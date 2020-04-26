@@ -2,17 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-using Microsoft.Extensions.Configuration;
-
-namespace consultant_server.Database
+namespace consultant_data.Database
 {
     public partial class khbatlzvContext : DbContext
     {
-        private IConfiguration _configuration;
-
-        public khbatlzvContext(IConfiguration configuration)
+        public khbatlzvContext()
         {
-            _configuration = configuration;
         }
 
         public khbatlzvContext(DbContextOptions<khbatlzvContext> options)
@@ -24,14 +19,17 @@ namespace consultant_server.Database
         public virtual DbSet<Caseclient> Caseclient { get; set; }
         public virtual DbSet<Casenotes> Casenotes { get; set; }
         public virtual DbSet<Cases> Cases { get; set; }
+        public virtual DbSet<Casestatuses> Casestatuses { get; set; }
         public virtual DbSet<Clients> Clients { get; set; }
+        public virtual DbSet<Consultants> Consultants { get; set; }
         public virtual DbSet<PgStatStatements> PgStatStatements { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseNpgsql(_configuration["Database:ConnectionString"]);
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseNpgsql("Host=drona.db.elephantsql.com;Database=khbatlzv;Username=khbatlzv;Password=F4-u2x4euMDzglWOk1IQgNbTScqok2ZU");
             }
         }
 
@@ -123,6 +121,10 @@ namespace consultant_server.Database
                     .HasColumnName("caseid")
                     .HasMaxLength(40);
 
+                entity.Property(e => e.Content)
+                    .HasColumnName("content")
+                    .HasMaxLength(255);
+
                 entity.Property(e => e.Noteid)
                     .HasColumnName("noteid")
                     .HasMaxLength(40);
@@ -144,8 +146,42 @@ namespace consultant_server.Database
                     .HasColumnName("caseid")
                     .HasMaxLength(40);
 
+                entity.Property(e => e.Activeconsultantid)
+                    .HasColumnName("activeconsultantid")
+                    .HasMaxLength(40);
+
                 entity.Property(e => e.Casetitle)
                     .HasColumnName("casetitle")
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Currentstatusid)
+                    .HasColumnName("currentstatusid")
+                    .HasMaxLength(40);
+
+                entity.HasOne(d => d.Activeconsultant)
+                    .WithMany(p => p.Cases)
+                    .HasForeignKey(d => d.Activeconsultantid)
+                    .HasConstraintName("cases_activeconsultantid_fkey");
+
+                entity.HasOne(d => d.Currentstatus)
+                    .WithMany(p => p.Cases)
+                    .HasForeignKey(d => d.Currentstatusid)
+                    .HasConstraintName("cases_currentstatusid_fkey");
+            });
+
+            modelBuilder.Entity<Casestatuses>(entity =>
+            {
+                entity.HasKey(e => e.Statusid)
+                    .HasName("casestatuses_pkey");
+
+                entity.ToTable("casestatuses");
+
+                entity.Property(e => e.Statusid)
+                    .HasColumnName("statusid")
+                    .HasMaxLength(40);
+
+                entity.Property(e => e.Statustext)
+                    .HasColumnName("statustext")
                     .HasMaxLength(100);
             });
 
@@ -163,6 +199,30 @@ namespace consultant_server.Database
                 entity.Property(e => e.Email)
                     .HasColumnName("email")
                     .HasMaxLength(100);
+
+                entity.Property(e => e.Firstname)
+                    .HasColumnName("firstname")
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Lastname)
+                    .HasColumnName("lastname")
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Middlename)
+                    .HasColumnName("middlename")
+                    .HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<Consultants>(entity =>
+            {
+                entity.HasKey(e => e.Consultantid)
+                    .HasName("consultants_pkey");
+
+                entity.ToTable("consultants");
+
+                entity.Property(e => e.Consultantid)
+                    .HasColumnName("consultantid")
+                    .HasMaxLength(40);
 
                 entity.Property(e => e.Firstname)
                     .HasColumnName("firstname")

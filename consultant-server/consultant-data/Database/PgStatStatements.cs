@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace consultant_server.Database
+namespace consultant_data.Database
 {
     public partial class PgStatStatements
     {
