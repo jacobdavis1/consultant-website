@@ -1,0 +1,30 @@
+Scaffolding Command, DB First:
+Scaffold-DbContext "Host=<database site, eg drona.elephantsql.com>;Database=<database name>;Username=<username>;Password=<password>" Npgsql.EntityFrameworkCore.PostgreSQL -OutputDir Database
+
+High-level Table Structures:
+
+ Case
+ - caseId (primary key)
+ - caseTitle
+
+ CaseNotes
+ - noteId (primary key)
+ - caseId (foreign key)
+ - content
+
+ Appointment
+ - appointmentId (primary key)
+ - caseId (foreign key)
+ - appointmentDateTime
+ - appointmentTitle
+
+ Client
+ - clientId (primary key)
+ - firstName
+ - middleName
+ - lastName
+ - email
+
+ CaseClient
+ - caseId (foreign key)
+ - clientId (foreign key)
