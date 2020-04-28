@@ -2,14 +2,12 @@
 
 ## Current Status
  Database scaffolding finished.
- C# scaffolding almost finished.
- Next: mappers and repository implementations.
+ Db models implemented.
+ Interfaces, Mappers, and Repositories implemented.
+ 
 
 ## Roadmap
  ### Data component
- - Finish scaffolding, i.e. complete model classes and repository interfaces in Logic.
- - Implement mappers to map EF Core entities to the C# models.
- - Implement interfaces for CRUD ops against the database.
  - Implement tests for all mappers and repositories.
 
  ### Logic component
