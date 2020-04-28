@@ -4,7 +4,7 @@ using System.Text;
 
 namespace consultant_logic.Models
 {
-    class Appointment
+    public class Appointment
     {
         public Guid Id { get; set; }
         public DateTime AppointmentDateTime { get; set; }

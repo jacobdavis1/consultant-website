@@ -6,18 +6,18 @@ using consultant_logic.Models;
 
 namespace consultant_logic.RepositoryInterfaces
 {
-    interface IAppointmentRepository
+    public interface IAppointmentRepository
     {
-        Task<bool> AddAppointment(Appointment appointment);
+        Task<bool> AddAppointmentAsync(Appointment appointment);
 
-        Task<Appointment> GetAppointmentById(Guid appointmentId);
+        Task<Appointment> GetAppointmentByIdAsync(Guid appointmentId);
 
-        Task<List<Appointment>> GetAllAppointmentsForConsultant(Consultant consultant);
+        Task<List<Appointment>> GetAllAppointmentsForConsultantAsync(Consultant consultant);
 
-        Task<List<Appointment>> GetAllAppointmentsForDate(DateTime dateTime);
+        Task<List<Appointment>> GetAllAppointmentsForDateAsync(DateTime dateTime);
 
-        Task<bool> UpdateAppointment(Appointment appointment);
+        Task<bool> UpdateAppointmentAsync(Appointment appointment);
 
-        Task<bool> DeleteAppointment(Appointment appointment);
+        Task<bool> DeleteAppointmentAsync(Appointment appointment);
     }
 }

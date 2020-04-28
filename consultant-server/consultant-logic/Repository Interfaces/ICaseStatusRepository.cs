@@ -7,16 +7,16 @@ using consultant_logic.Models;
 
 namespace consultant_logic.RepositoryInterfaces
 {
-    interface ICaseStatusRepository
+    public interface ICaseStatusRepository
     {
-        Task<bool> AddCaseStatus(CaseStatus caseStatus);
+        Task<bool> AddCaseStatusAsync(CaseStatus caseStatus);
 
-        Task<CaseStatus> GetCaseStatusById(Guid statusId);
+        Task<CaseStatus> GetCaseStatusByIdAsync(Guid statusId);
 
-        Task<CaseStatus> GetCaseStatusByText(string text);
+        Task<CaseStatus> GetCaseStatusByTextAsync(string text);
 
-        Task<bool> UpdateCaseStatus(CaseStatus caseStatus);
+        Task<bool> UpdateCaseStatusAsync(CaseStatus caseStatus);
 
-        Task<bool> DeleteCaseStatus(CaseStatus caseStatus);
+        Task<bool> DeleteCaseStatusAsync(CaseStatus caseStatus);
     }
 }

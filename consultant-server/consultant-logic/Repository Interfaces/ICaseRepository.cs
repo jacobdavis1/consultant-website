@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace consultant_logic.RepositoryInterfaces
 {
-    interface ICaseRepository
+    public interface ICaseRepository
     {
-        Task<bool> AddCase(Case targetCase);
+        Task<bool> AddCaseAsync(Case targetCase);
 
-        Task<Case> GetCaseById(Guid caseId);
+        Task<Case> GetCaseByIdAsync(Guid caseId);
 
-        Task<List<Case>> GetAllCasesForConsultant(Consultant consultant);
+        Task<List<Case>> GetAllCasesForConsultantAsync(Consultant consultant);
 
-        Task<bool> UpdateCase(Case targetCase);
+        Task<bool> UpdateCaseAsync(Case targetCase);
 
-        Task<bool> DeleteCase(Case targetCase);
+        Task<bool> DeleteCaseAsync(Case targetCase);
     }
 }

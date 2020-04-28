@@ -7,18 +7,18 @@ using consultant_logic.Models;
 
 namespace consultant_logic.RepositoryInterfaces
 {
-    interface IClientRepository
+    public interface IClientRepository
     {
-        Task<bool> AddClient(Client client);
+        Task<bool> AddClientAsync(Client client);
 
-        Task<Client> GetClientById(Guid clientId);
+        Task<Client> GetClientByIdAsync(Guid clientId);
 
-        Task<List<Client>> SearchClientsByName(string firstName, string middleName, string lastName);
+        Task<List<Client>> SearchClientsByNameAsync(string firstName, string middleName, string lastName);
 
-        Task<List<Client>> GetAllClientsByCase(Case targetCase);
+        Task<List<Client>> GetAllClientsByCaseAsync(Case targetCase);
 
-        Task<bool> UpdateClient(Client client);
+        Task<bool> UpdateClientAsync(Client client);
 
-        Task<bool> DeleteClient(Client client);
+        Task<bool> DeleteClientAsync(Client client);
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace consultant_logic.Models
 {
-    class Client
+    public class Client
     {
         public Guid Id { get; set; }
         public string FirstName { get; set; }

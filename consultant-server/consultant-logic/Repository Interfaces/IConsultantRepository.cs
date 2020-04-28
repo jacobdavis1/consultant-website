@@ -7,16 +7,16 @@ using consultant_logic.Models;
 
 namespace consultant_logic.RepositoryInterfaces
 {
-    interface IConsultantRepository
+    public interface IConsultantRepository
     {
-        Task<bool> AddConsultant(Consultant consultant);
+        Task<bool> AddConsultantAsync(Consultant consultant);
 
-        Task<Consultant> GetConsultantById(Guid consultantId);
+        Task<Consultant> GetConsultantByIdAsync(Guid consultantId);
 
-        Task<List<Consultant>> SearchConsultantsByName(string firstName, string middleName, string lastName);
+        Task<List<Consultant>> SearchConsultantsByNameAsync(string firstName, string middleName, string lastName);
 
-        Task<bool> UpdateConsultant(Consultant consultant);
+        Task<bool> UpdateConsultantAsync(Consultant consultant);
 
-        Task<bool> DeleteConsultant(Consultant consultant);
+        Task<bool> DeleteConsultantAsync(Consultant consultant);
     }
 }

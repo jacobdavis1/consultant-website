@@ -6,16 +6,16 @@ using consultant_logic.Models;
 
 namespace consultant_logic.RepositoryInterfaces
 {
-    interface ICaseNoteRepository
+    public interface ICaseNoteRepository
     {
-        Task<bool> AddNote(CaseNote note);
+        Task<bool> AddNoteAsync(CaseNote note);
 
-        Task<CaseNote> GetNoteById(Guid noteId);
+        Task<CaseNote> GetNoteByIdAsync(Guid noteId);
 
-        Task<List<CaseNote>> GetAllNotesForCase(Case targetCase);
+        Task<List<CaseNote>> GetAllNotesForCaseAsync(Case targetCase);
 
-        Task<bool> UpdateNote(CaseNote note);
+        Task<bool> UpdateNoteAsync(CaseNote note);
 
-        Task<bool> DeleteNote(CaseNote note);
+        Task<bool> DeleteNoteAsync(CaseNote note);
     }
 }

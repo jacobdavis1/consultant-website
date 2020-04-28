@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Repositories\" />
+    <ProjectReference Include="..\consultant-logic\consultant-logic.csproj" />
   </ItemGroup>
 
 </Project>

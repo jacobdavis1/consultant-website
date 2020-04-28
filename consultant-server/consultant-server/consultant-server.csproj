@@ -6,5 +6,10 @@
     <UserSecretsId>9839516e-552e-409a-9942-d2838831af56</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\consultant-data\consultant-data.csproj" />
+    <ProjectReference Include="..\consultant-logic\consultant-logic.csproj" />
+  </ItemGroup>
+
 
 </Project>
