@@ -6,10 +6,10 @@ using System.Linq;
 
 using consultant_data.Database;
 using consultant_data.Mappers;
-using consultant_logic.Models;
-using consultant_logic.RepositoryInterfaces;
+using consultant_data.Models;
+using consultant_data.RepositoryInterfaces;
 
-namespace consultant_data.Repositories
+namespace consultant_logic.Repositories
 {
     public class ConsultantRepository : IConsultantRepository
     {
@@ -24,7 +24,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                await _context.Consultants.AddAsync(consultant);
+                await _context.Consultants.AddAsync(ConsultantMapper.Map(consultant));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -38,7 +38,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                return ConsultantMapper.MapConsultant(await _context.Consultants.FindAsync(consultantId.ToString()));
+                return ConsultantMapper.Map(await _context.Consultants.FindAsync(consultantId.ToString()));
             }
             catch (Exception e)
             {
@@ -53,7 +53,7 @@ namespace consultant_data.Repositories
                 return _context.Consultants.Where(c => (c.Firstname == firstName || firstName == "") 
                                                             && (c.Middlename == middleName || middleName == "") 
                                                             && (c.Lastname == lastName || lastName == "") )
-                    .Select(ConsultantMapper.MapConsultant)
+                    .Select(ConsultantMapper.Map)
                     .ToList();
             }
             catch (Exception e)
@@ -66,7 +66,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Consultants.Update(ConsultantMapper.MapConsultant(consultant));
+                _context.Consultants.Update(ConsultantMapper.Map(consultant));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -80,7 +80,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Consultants.Remove(ConsultantMapper.MapConsultant(consultant));
+                _context.Consultants.Remove(ConsultantMapper.Map(consultant));
                 await _context.SaveChangesAsync();
                 return true;
             }

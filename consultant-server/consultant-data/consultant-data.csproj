@@ -16,8 +16,4 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.3" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\consultant-logic\consultant-logic.csproj" />
-  </ItemGroup>
-
 </Project>

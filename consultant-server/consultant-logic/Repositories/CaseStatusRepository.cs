@@ -6,25 +6,26 @@ using System.Linq;
 
 using consultant_data.Database;
 using consultant_data.Mappers;
-using consultant_logic.Models;
-using consultant_logic.RepositoryInterfaces;
+using consultant_data.Models;
+using consultant_data.RepositoryInterfaces;
+
 
 namespace consultant_data.Repositories
 {
-    class CaseRepository
+    class CaseStatusRepository
     {
         private readonly khbatlzvContext _context;
 
-        public CaseRepository(khbatlzvContext context)
+        public CaseStatusRepository(khbatlzvContext context)
         {
             _context = context;
         }
 
-        public async Task<bool> AddCaseAsync(Case targetCase)
+        public async Task<bool> AddCaseStatusAsync(CaseStatus caseStatus)
         {
             try
             {
-                await _context.Cases.AddAsync(CaseMapper.MapCase(targetCase));
+                await _context.Casestatuses.AddAsync(CaseStatusMapper.Map(caseStatus));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -34,11 +35,11 @@ namespace consultant_data.Repositories
             }
         }
 
-        public async Task<Case> GetCaseByIdAsync(Guid caseId)
+        public async Task<CaseStatus> GetCaseStatusByIdAsync(Guid statusId)
         {
             try
             {
-                return CaseMapper.MapCase(await _context.Cases.FindAsync(caseId.ToString()));
+                return CaseStatusMapper.Map(await _context.Casestatuses.FindAsync(statusId.ToString()));
             }
             catch (Exception e)
             {
@@ -46,25 +47,23 @@ namespace consultant_data.Repositories
             }
         }
 
-        public async Task<List<Case>> GetAllCasesForConsultantAsync(Consultant consultant)
+        public async Task<CaseStatus> GetCaseStatusByTextAsync(string text)
         {
             try
             {
-                return _context.Cases.Where(c => c.Activeconsultant.Consultantid == consultant.Id.ToString())
-                    .Select(CaseMapper.MapCase)
-                    .ToList();
+                return CaseStatusMapper.Map(_context.Casestatuses.FirstOrDefault(s => s.Statustext == text));
             }
             catch (Exception e)
             {
-                return new List<Case>();
+                return null;
             }
         }
 
-        public async Task<bool> UpdateCaseAsync(Case targetCase)
+        public async Task<bool> UpdateCaseStatusAsync(CaseStatus caseStatus)
         {
             try
             {
-                _context.Cases.Update(CaseMapper.MapCase(targetCase));
+                _context.Casestatuses.Update(CaseStatusMapper.Map(caseStatus));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -74,11 +73,11 @@ namespace consultant_data.Repositories
             }
         }
 
-        public async Task<bool> DeleteCaseAsync(Case targetCase)
+        public async Task<bool> DeleteCaseStatusAsync(CaseStatus caseStatus)
         {
             try
             {
-                _context.Cases.Remove(CaseMapper.MapCase(targetCase));
+                _context.Casestatuses.Remove(CaseStatusMapper.Map(caseStatus));
                 await _context.SaveChangesAsync();
                 return true;
             }

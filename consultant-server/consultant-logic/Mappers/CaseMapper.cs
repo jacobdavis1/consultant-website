@@ -3,24 +3,24 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
-using consultant_logic.Models;
+using consultant_data.Models;
 
 namespace consultant_data.Mappers
 {
     public class CaseMapper
     {
-        public static Case MapCase(Database.Cases targetCase)
+        public static Case Map(Database.Cases targetCase)
         {
             return new Case
             {
                 Id = Guid.Parse(targetCase.Caseid),
                 Title = targetCase.Casetitle,
-                Status = CaseStatusMapper.MapCaseStatus(targetCase.Currentstatus),
-                UpcomingApointments = targetCase.Appointments.Select(AppointmentMapper.MapAppointment).ToList()
+                Status = CaseStatusMapper.Map(targetCase.Currentstatus),
+                UpcomingApointments = targetCase.Appointments.Select(AppointmentMapper.Map).ToList()
             };
         }
 
-        public static Database.Cases MapCase(Case targetCase)
+        public static Database.Cases Map(Case targetCase)
         {
             return new Database.Cases
             {

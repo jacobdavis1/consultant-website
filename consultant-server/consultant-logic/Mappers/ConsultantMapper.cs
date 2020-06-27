@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-using consultant_logic.Models;
+using consultant_data.Models;
 
 namespace consultant_data.Mappers
 {
     public class ConsultantMapper
     {
-        public static Consultant MapConsultant(Database.Consultants consultant)
+        public static Consultant Map(Database.Consultants consultant)
         {
             return new Consultant
             {
@@ -19,7 +19,7 @@ namespace consultant_data.Mappers
             };
         }
 
-        public static Database.Consultants MapConsultant(Consultant consultant)
+        public static Database.Consultants Map(Consultant consultant)
         {
             return new Database.Consultants
             {
@@ -27,7 +27,7 @@ namespace consultant_data.Mappers
                 Firstname = consultant.FirstName,
                 Middlename = consultant.MiddleName,
                 Lastname = consultant.LastName
-            }
+            };
         }
     }
 }

@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-using consultant_logic.Models;
+using consultant_data.Models;
 
 namespace consultant_data.Mappers
 {
     public class CaseStatusMapper
     {
-        public static CaseStatus MapCaseStatus(Database.Casestatuses caseStatus)
+        public static CaseStatus Map(Database.Casestatuses caseStatus)
         {
             return new CaseStatus
             {
@@ -17,7 +17,7 @@ namespace consultant_data.Mappers
             };
         }
 
-        public static Database.Casestatuses MapCaseStatus(CaseStatus caseStatus)
+        public static Database.Casestatuses Map(CaseStatus caseStatus)
         {
             return new Database.Casestatuses
             {

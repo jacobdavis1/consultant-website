@@ -10,11 +10,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "consultant-server", "consul
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "consultant-logic", "consultant-logic\consultant-logic.csproj", "{1BFCFF11-A131-41E9-A0A0-07FABB14A543}"
+	ProjectSection(ProjectDependencies) = postProject
+		{144C5617-2ED5-4FDB-AEB2-5C31D035AF0B} = {144C5617-2ED5-4FDB-AEB2-5C31D035AF0B}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "consultant-data", "consultant-data\consultant-data.csproj", "{144C5617-2ED5-4FDB-AEB2-5C31D035AF0B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{1BFCFF11-A131-41E9-A0A0-07FABB14A543} = {1BFCFF11-A131-41E9-A0A0-07FABB14A543}
-	EndProjectSection
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "consultant-test", "consultant-test\consultant-test.fsproj", "{B273D9DA-A8AF-4BB7-BD43-7FA736B3B763}"
 	ProjectSection(ProjectDependencies) = postProject

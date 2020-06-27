@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-using consultant_logic.Models;
+using consultant_data.Models;
 
-namespace consultant_logic.RepositoryInterfaces
+namespace consultant_data.RepositoryInterfaces
 {
     public interface IClientRepository
     {

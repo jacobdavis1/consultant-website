@@ -6,8 +6,8 @@ using System.Linq;
 
 using consultant_data.Database;
 using consultant_data.Mappers;
-using consultant_logic.Models;
-using consultant_logic.RepositoryInterfaces;
+using consultant_data.Models;
+using consultant_data.RepositoryInterfaces;
 
 namespace consultant_data.Repositories
 {
@@ -24,7 +24,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                await _context.Appointments.AddAsync(AppointmentMapper.MapAppointment(appointment));
+                await _context.Appointments.AddAsync(AppointmentMapper.Map(appointment));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -39,7 +39,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                return AppointmentMapper.MapAppointment(await _context.Appointments.FindAsync(appointmentId.ToString()));
+                return AppointmentMapper.Map(await _context.Appointments.FindAsync(appointmentId.ToString()));
             }
             catch (Exception e)
             {
@@ -53,7 +53,7 @@ namespace consultant_data.Repositories
             {
                 return _context.Appointments
                     .Where(a => a.Case.Activeconsultantid == consultant.Id.ToString())
-                    .Select(AppointmentMapper.MapAppointment)
+                    .Select(AppointmentMapper.Map)
                     .ToList();
             }
             catch (Exception e)
@@ -68,7 +68,7 @@ namespace consultant_data.Repositories
             {
                 return _context.Appointments
                     .Where(a => a.Appointmentdatetime.GetValueOrDefault().Date.CompareTo(dateTime.Date) == 0)
-                    .Select(AppointmentMapper.MapAppointment)
+                    .Select(AppointmentMapper.Map)
                     .ToList();
             }
             catch (Exception e)
@@ -81,7 +81,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Appointments.Update(AppointmentMapper.MapAppointment(appointment));
+                _context.Appointments.Update(AppointmentMapper.Map(appointment));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -95,7 +95,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Appointments.Remove(AppointmentMapper.MapAppointment(appointment));
+                _context.Appointments.Remove(AppointmentMapper.Map(appointment));
                 await _context.SaveChangesAsync();
                 return true;
             }

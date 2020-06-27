@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-using consultant_logic.Models;
+using consultant_data.Models;
 
 namespace consultant_data.Mappers
 {
     public class CaseNoteMapper
     {
-        public static CaseNote MapCaseNote(Database.Casenotes caseNote)
+        public static CaseNote Map(Database.Casenotes caseNote)
         {
             return new CaseNote
             {
@@ -17,7 +17,7 @@ namespace consultant_data.Mappers
             };
         }
 
-        public static Database.Casenotes MapCaseNote(CaseNote caseNote)
+        public static Database.Casenotes Map(CaseNote caseNote)
         {
             return new Database.Casenotes
             {

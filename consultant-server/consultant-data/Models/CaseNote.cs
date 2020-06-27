@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace consultant_logic.Models
+namespace consultant_data.Models
 {
-    public class CaseStatus
+    public class CaseNote
     {
         public Guid Id { get; set; }
-        public string Text { get; set; }
+
+        public string Content { get; set; }
     }
 }

@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-using consultant_logic.Models;
+using consultant_data.Models;
 
 namespace consultant_data.Mappers
 {
     public class AppointmentMapper
     {
-        public static Appointment MapAppointment(Database.Appointments appointment)
+        public static Appointment Map(Database.Appointments appointment)
         {
             return new Appointment
             {
@@ -18,7 +18,7 @@ namespace consultant_data.Mappers
             };
         }
 
-        public static Database.Appointments MapAppointment(Appointment appointment)
+        public static Database.Appointments Map(Appointment appointment)
         {
             return new Database.Appointments
             {

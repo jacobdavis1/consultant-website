@@ -6,8 +6,8 @@ using System.Linq;
 
 using consultant_data.Database;
 using consultant_data.Mappers;
-using consultant_logic.Models;
-using consultant_logic.RepositoryInterfaces;
+using consultant_data.Models;
+using consultant_data.RepositoryInterfaces;
 
 namespace consultant_data.Repositories
 {
@@ -24,7 +24,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                await _context.Clients.AddAsync(ClientMapper.MapClient(client));
+                await _context.Clients.AddAsync(ClientMapper.Map(client));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -38,7 +38,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                return ClientMapper.MapClient(await _context.Clients.FindAsync(clientId.ToString()));
+                return ClientMapper.Map(await _context.Clients.FindAsync(clientId.ToString()));
             }
             catch (Exception e)
             {
@@ -53,7 +53,7 @@ namespace consultant_data.Repositories
                 return _context.Clients.Where(c => (c.Firstname == firstName || firstName == "")
                                                             && (c.Middlename == middleName || middleName == "")
                                                             && (c.Lastname == lastName || lastName == ""))
-                    .Select(ClientMapper.MapClient)
+                    .Select(ClientMapper.Map)
                     .ToList();
             }
             catch (Exception e)
@@ -87,7 +87,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Clients.Update(ClientMapper.MapClient(client));
+                _context.Clients.Update(ClientMapper.Map(client));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -101,7 +101,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Clients.Remove(ClientMapper.MapClient(client));
+                _context.Clients.Remove(ClientMapper.Map(client));
                 await _context.SaveChangesAsync();
                 return true;
             }

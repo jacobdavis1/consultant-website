@@ -6,26 +6,25 @@ using System.Linq;
 
 using consultant_data.Database;
 using consultant_data.Mappers;
-using consultant_logic.Models;
-using consultant_logic.RepositoryInterfaces;
-
+using consultant_data.Models;
+using consultant_data.RepositoryInterfaces;
 
 namespace consultant_data.Repositories
 {
-    class CaseStatusRepository
+    class CaseNoteRepository
     {
         private readonly khbatlzvContext _context;
 
-        public CaseStatusRepository(khbatlzvContext context)
+        public CaseNoteRepository(khbatlzvContext context)
         {
             _context = context;
         }
 
-        public async Task<bool> AddCaseStatusAsync(CaseStatus caseStatus)
+        public async Task<bool> AddNoteAsync(CaseNote note)
         {
             try
             {
-                await _context.Casestatuses.AddAsync(CaseStatusMapper.MapCaseStatus(caseStatus));
+                await _context.Casenotes.AddAsync(CaseNoteMapper.Map(note));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -35,11 +34,11 @@ namespace consultant_data.Repositories
             }
         }
 
-        public async Task<CaseStatus> GetCaseStatusByIdAsync(Guid statusId)
+        public async Task<CaseNote> GetNoteByIdAsync(Guid noteId)
         {
             try
             {
-                return CaseStatusMapper.MapCaseStatus(await _context.Casestatuses.FindAsync(statusId.ToString()));
+                return CaseNoteMapper.Map(await _context.Casenotes.FindAsync(noteId.ToString()));
             }
             catch (Exception e)
             {
@@ -47,23 +46,25 @@ namespace consultant_data.Repositories
             }
         }
 
-        public async Task<CaseStatus> GetCaseStatusByTextAsync(string text)
+        public async Task<List<CaseNote>> GetAllNotesForCaseAsync(Case targetCase)
         {
             try
             {
-                return CaseStatusMapper.MapCaseStatus(_context.Casestatuses.FirstOrDefault(s => s.Statustext == text));
+                return _context.Casenotes.Where(cn => cn.Caseid == targetCase.Id.ToString())
+                    .Select(CaseNoteMapper.Map)
+                    .ToList();
             }
             catch (Exception e)
             {
-                return null;
+                return new List<CaseNote>();
             }
         }
 
-        public async Task<bool> UpdateCaseStatusAsync(CaseStatus caseStatus)
+        public async Task<bool> UpdateNoteAsync(CaseNote note)
         {
             try
             {
-                _context.Casestatuses.Update(CaseStatusMapper.MapCaseStatus(caseStatus));
+                _context.Casenotes.Update(CaseNoteMapper.Map(note));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -73,11 +74,11 @@ namespace consultant_data.Repositories
             }
         }
 
-        public async Task<bool> DeleteCaseStatusAsync(CaseStatus caseStatus)
+        public async Task<bool> DeleteNoteAsync(CaseNote note)
         {
             try
             {
-                _context.Casestatuses.Remove(CaseStatusMapper.MapCaseStatus(caseStatus));
+                _context.Casenotes.Remove(CaseNoteMapper.Map(note));
                 await _context.SaveChangesAsync();
                 return true;
             }

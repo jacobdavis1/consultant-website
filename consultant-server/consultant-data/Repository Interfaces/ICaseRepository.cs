@@ -1,10 +1,10 @@
-﻿using consultant_logic.Models;
+﻿using consultant_data.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace consultant_logic.RepositoryInterfaces
+namespace consultant_data.RepositoryInterfaces
 {
     public interface ICaseRepository
     {

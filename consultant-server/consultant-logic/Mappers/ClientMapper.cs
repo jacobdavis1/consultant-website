@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-using consultant_logic.Models;
+using consultant_data.Models;
 
 namespace consultant_data.Mappers
 {
     public class ClientMapper
     {
-        public static Client MapClient(Database.Clients client)
+        public static Client Map(Database.Clients client)
         {
             return new Client
             {
@@ -20,7 +20,7 @@ namespace consultant_data.Mappers
             };
         }
 
-        public static Database.Clients MapClient(Client client)
+        public static Database.Clients Map(Client client)
         {
             return new Database.Clients
             {
@@ -29,7 +29,7 @@ namespace consultant_data.Mappers
                 Middlename = client.MiddleName,
                 Lastname = client.LastName,
                 Email = client.Email
-            }
+            };
         }
     }
 }
