@@ -2,6 +2,7 @@
 using consultant_data.Models;
 using consultant_data.RepositoryInterfaces;
 using consultant_logic.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -18,18 +19,18 @@ namespace ConsoleRunner
             IUserRepository userRepository = new UserRepository(context);
             ICaseRepository caseRepository = new CaseRepository(context);
             ICaseStatusRepository caseStatusRepository = new CaseStatusRepository(context);
-            IAppointmentRepository appointmentRepository = new AppointmentRepository(context);
-            ICaseNoteRepository caseNoteRepository = new CaseNoteRepository(context);
 
             Console.WriteLine("Time to run some live tests!");
+            Console.WriteLine();
+            Console.WriteLine();
 
-            // await RunUserTests(userRepository);
-            // await RunUserWithCasesTest(userRepository, caseRepository, caseStatusRepository);
-            // await RunCaseWithAppointmentsTest(userRepository, caseRepository, caseStatusRepository, appointmentRepository);
-            await RunCaseWithNotesTest(userRepository, caseRepository, caseStatusRepository, caseNoteRepository);
+            await RunUserTests(userRepository);
+            await RunUserWithCasesTest(userRepository, caseRepository, caseStatusRepository);
+            await RunCaseWithAppointmentsTest(userRepository, caseRepository, caseStatusRepository);
+            await RunCaseWithNotesTest(userRepository, caseRepository, caseStatusRepository);
         }
 
-        static async Task RunUserTests(IUserRepository userRepository)
+        static async Task RunUserTests(IUserRepository _user)
         {
             Console.WriteLine("Beginning user tests...");
             
@@ -44,32 +45,36 @@ namespace ConsoleRunner
             };
 
             Console.WriteLine("Adding user...");
-            await userRepository.AddUserAsync(user);
+            await _user.AddUserAsync(user);
 
             Console.WriteLine("Added user with id " + user.Id.ToString() + ". User set to null.");
             String userId = user.Id.ToString();
             user = null;
 
-            user = await userRepository.GetUserByIdAsync(Guid.Parse(userId));
+            user = await _user.GetUserByIdAsync(Guid.Parse(userId));
             Console.WriteLine("Checking get: user name: " + user.FirstName + " " + user.MiddleName + " " + user.LastName + " ");
             Console.WriteLine("Changing name...");
 
             user.FirstName = "TestName";
-            await userRepository.UpdateUserAsync(user);
+            await _user.UpdateUserAsync(user);
             Console.WriteLine("User name: " + user.FirstName + " " + user.MiddleName + " " + user.LastName + " ");
 
             Console.WriteLine("Deleting added user.");
 
-            await userRepository.DeleteUserAsync(user);
+            await _user.DeleteUserAsync(user);
 
             user = null;
-            user = await userRepository.GetUserByIdAsync(Guid.Parse(userId));
+            user = await _user.GetUserByIdAsync(Guid.Parse(userId));
 
-            Console.WriteLine("User get after delete: " + ((user == null) ? "null" : "not null (error)"));
+            Console.WriteLine("Deletion: " + ((user == null) ? "Success" : "Failure"));
+            Console.WriteLine("TEST END");
+            Console.WriteLine();
+            Console.WriteLine();
         }
 
         static async Task RunUserWithCasesTest(IUserRepository _user, ICaseRepository _case, ICaseStatusRepository _caseStatus)
         {
+            Console.WriteLine("TEST BEGIN.");
             Console.WriteLine("Beginning user with cases test...");
 
             // Check that the "New" status exists, and if it doesnt, create it
@@ -124,10 +129,22 @@ namespace ConsoleRunner
             await _user.DeleteUserAsync(client);
             await _case.DeleteCaseAsync(aCase);
             await _user.DeleteUserAsync(consultant);
+
+            client = await _user.GetUserByIdAsync(client.Id);
+            aCase = await _case.GetCaseByIdAsync(aCase.Id);
+            consultant = await _user.GetUserByIdAsync(consultant.Id);
+
+            Console.WriteLine("Deletion: " + ((client == null && aCase == null && consultant == null) ? "Success" : "Failure"));
+            Console.WriteLine("TEST END.");
+            Console.WriteLine();
+            Console.WriteLine();
         }
 
-        static async Task RunCaseWithAppointmentsTest(IUserRepository _user, ICaseRepository _case, ICaseStatusRepository _caseStatus, IAppointmentRepository _appointment)
+        static async Task RunCaseWithAppointmentsTest(IUserRepository _user, ICaseRepository _case, ICaseStatusRepository _caseStatus)
         {
+            Console.WriteLine("TEST BEGIN");
+            Console.WriteLine("Beginning appointment test...");
+
             // Check that the "New" status exists, and if it doesnt, create it
             CaseStatus statusNew = await _caseStatus.GetCaseStatusByTextAsync("New");
             if (statusNew == null)
@@ -140,6 +157,8 @@ namespace ConsoleRunner
                 await _caseStatus.AddCaseStatusAsync(statusNew);
             }
 
+            // SETUP
+            Console.WriteLine("Setting up test data...");
             User consultant = new User
             {
                 Id = Guid.NewGuid(),
@@ -168,22 +187,28 @@ namespace ConsoleRunner
                 Clients = new List<User> { client },
                 Status = statusNew
             };
-            aCase.UpcomingAppointments.Add(new Appointment
+            await _case.AddCaseAsync(aCase);
+
+            // CREATE appointments for case
+            Console.WriteLine("Creating appointments...");
+            await _case.AddAppointmentToCaseAsync(aCase, new Appointment
             {
                 Id = Guid.NewGuid(),
                 CaseId = aCase.Id,
                 AppointmentDateTime = DateTime.Now,
                 Title = "Test Appointment 1"
             });
-            aCase.UpcomingAppointments.Add(new Appointment
+
+            await _case.AddAppointmentToCaseAsync(aCase, new Appointment
             {
                 Id = Guid.NewGuid(),
                 CaseId = aCase.Id,
                 AppointmentDateTime = DateTime.Today,
                 Title = "Test Appointment 2"
             });
-            await _case.AddCaseAsync(aCase);
 
+            // RETRIEVE case via client
+            Console.WriteLine("Retrieving data...");
             client = await _user.GetUserByIdAsync(client.Id);
             foreach (Case c in client.Cases)
             {
@@ -193,6 +218,27 @@ namespace ConsoleRunner
                 }
             }
 
+            // UPDATE first appointment to be for tomorrow
+            Console.WriteLine("Updating an appointment...");
+            client.Cases[0].UpcomingAppointments[0].AppointmentDateTime = client.Cases[0].UpcomingAppointments[0].AppointmentDateTime.AddDays(1);
+            await _case.UpdateAppointmentAsync(client.Cases[0].UpcomingAppointments[0]);
+
+            // DELETE appointment
+            Console.WriteLine("Deleting an appointment...");
+            await _case.DeleteAppointmentFromCaseAsync(client.Cases[0], client.Cases[0].UpcomingAppointments[1]);
+
+            // RETRIEVE case via client a second time to see update
+            Console.WriteLine("Retrieving data again...");
+            client = await _user.GetUserByIdAsync(client.Id);
+            foreach (Case c in client.Cases)
+            {
+                foreach (Appointment a in c.UpcomingAppointments)
+                {
+                    Console.WriteLine("Appointment for " + c.Title + ": " + a.AppointmentDateTime);
+                }
+            }
+
+            // CLEANUP
             Console.WriteLine("Deleting entries...");
             await _user.DeleteUserAsync(client);
             await _case.DeleteCaseAsync(aCase);
@@ -202,11 +248,19 @@ namespace ConsoleRunner
             aCase = await _case.GetCaseByIdAsync(aCase.Id);
             consultant = await _user.GetUserByIdAsync(consultant.Id);
 
-            Console.WriteLine("Deletion: " + ((client == null && aCase == null && consultant == null) ? "Success" : "Failed")); 
+            Console.WriteLine("Deletion: " + ((client == null && aCase == null && consultant == null) ? "Success" : "Failure"));
+            Console.WriteLine("TEST END.");
+            Console.WriteLine();
+            Console.WriteLine();
         }
 
-        static async Task RunCaseWithNotesTest(IUserRepository _user, ICaseRepository _case, ICaseStatusRepository _caseStatus, ICaseNoteRepository _note)
+        static async Task RunCaseWithNotesTest(IUserRepository _user, ICaseRepository _case, ICaseStatusRepository _caseStatus)
         {
+            Console.WriteLine("TEST BEGIN.");
+            Console.WriteLine("Beginning note test...");
+
+            // SET UP
+            Console.WriteLine("Setting up test data...");
             // Check that the "New" status exists, and if it doesnt, create it
             CaseStatus statusNew = await _caseStatus.GetCaseStatusByTextAsync("New");
             if (statusNew == null)
@@ -247,20 +301,25 @@ namespace ConsoleRunner
                 Clients = new List<User> { client },
                 Status = statusNew
             };
-            aCase.Notes.Add(new CaseNote
+            await _case.AddCaseAsync(aCase);
+
+            // CREATE new notes and add them to the case
+            Console.WriteLine("Creating notes...");
+            await _case.AddNoteToCaseAsync(aCase, new CaseNote
             {
                 Id = Guid.NewGuid(),
                 CaseId = aCase.Id,
                 Content = "This case is a test case, and this is a test note."
             });
-            aCase.Notes.Add(new CaseNote
+            await _case.AddNoteToCaseAsync(aCase, new CaseNote
             {
                 Id = Guid.NewGuid(),
                 CaseId = aCase.Id,
                 Content = "Another test note."
             });
-            await _case.AddCaseAsync(aCase);
 
+            // RETRIEVE the user with the case to get the client
+            Console.WriteLine("Retrieving notes...");
             client = await _user.GetUserByIdAsync(client.Id);
             foreach (Case c in client.Cases)
             {
@@ -270,6 +329,28 @@ namespace ConsoleRunner
                 }
             }
 
+            // UPDATE a note
+            Console.WriteLine("Updating a note...");
+            CaseNote note = client.Cases[0].Notes[0];
+            note.Content = "Updated content.";
+            await _case.UpdateNoteAsync(note);
+
+            // DELETE a note
+            Console.WriteLine("Deleting  note...");
+            await _case.DeleteNoteFromCaseAsync(client.Cases[0], client.Cases[0].Notes[1]);
+
+            // RETRIEVE again to see the changes
+            Console.WriteLine("Retrieving notes again...");
+            client = await _user.GetUserByIdAsync(client.Id);
+            foreach (Case c in client.Cases)
+            {
+                foreach (CaseNote cn in c.Notes)
+                {
+                    Console.WriteLine("Note: " + cn.Content);
+                }
+            }
+
+            // CLEAN UP
             Console.WriteLine("Deleting entries...");
             await _user.DeleteUserAsync(client);
             await _case.DeleteCaseAsync(aCase);
@@ -279,7 +360,10 @@ namespace ConsoleRunner
             client = await _user.GetUserByIdAsync(client.Id);
             aCase = await _case.GetCaseByIdAsync(aCase.Id);
 
-            Console.WriteLine("Deletion: " + ((consultant == null && client == null && aCase == null) ? "Successful" : "Failed"));
+            Console.WriteLine("Deletion: " + ((consultant == null && client == null && aCase == null) ? "Success" : "Failure"));
+            Console.WriteLine("TEST END.");
+            Console.WriteLine();
+            Console.WriteLine();
         }
     }
 }

@@ -40,11 +40,15 @@ namespace consultant_logic.Repositories
         {
             try
             {
-                return UserMapper.Map(await _context.Users
-                    .Include(u => u.Caseclient)
+                Users dbUser = await _context.Users
                     .Include(u => u.Cases).ThenInclude(c => c.Appointments)
                     .Include(u => u.Cases).ThenInclude(c => c.Casenotes)
-                    .FirstOrDefaultAsync(u => u.Userid == userId.ToString()));
+                    .FirstOrDefaultAsync(u => u.Userid == userId.ToString());
+
+                if (dbUser == null)
+                    return null;
+
+                return UserMapper.Map(dbUser);
             }
             catch (Exception e)
             {
@@ -59,8 +63,8 @@ namespace consultant_logic.Repositories
                 return _context.Users
                     .Include(u => u.Cases)
                     .Where(c => (c.Firstname == firstName || firstName == "")
-                                                            && (c.Middlename == middleName || middleName == "")
-                                                            && (c.Lastname == lastName || lastName == ""))
+                        && (c.Middlename == middleName || middleName == "")
+                        && (c.Lastname == lastName || lastName == ""))
                     .Select(UserMapper.Map)
                     .ToList();
             }
@@ -96,7 +100,7 @@ namespace consultant_logic.Repositories
             try
             {
                 // Update the User
-                _context.Users.Update(_context.Users.FirstOrDefault(c => c.Userid == user.Id.ToString()));
+                _context.Users.Update(await _context.Users.FirstOrDefaultAsync(c => c.Userid == user.Id.ToString()));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -113,13 +117,14 @@ namespace consultant_logic.Repositories
                 // Remove all caseclient entries
                 foreach (Case c in user.Cases)
                 {
-                    Caseclient cc = _context.Caseclient.FirstOrDefault(cc => cc.Clientid == user.Id.ToString());
+                    // Select the caseclient with the user's id and the case id pertaining to this case
+                    Caseclient cc = await _context.Caseclient.FirstOrDefaultAsync(cc => cc.Clientid == user.Id.ToString() && cc.Caseid == c.Id.ToString());
                     if (cc != null)
                         _context.Caseclient.Remove(cc);
                 }
 
                 // Finally, remove the user
-                _context.Users.Remove(_context.Users.FirstOrDefault(c => c.Userid == user.Id.ToString()));
+                _context.Users.Remove(await _context.Users.FirstOrDefaultAsync(c => c.Userid == user.Id.ToString()));
                 await _context.SaveChangesAsync();
                 return true;
             }
