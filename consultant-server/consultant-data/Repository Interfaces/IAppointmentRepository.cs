@@ -12,7 +12,7 @@ namespace consultant_data.RepositoryInterfaces
 
         Task<Appointment> GetAppointmentByIdAsync(Guid appointmentId);
 
-        Task<List<Appointment>> GetAllAppointmentsForConsultantAsync(Consultant consultant);
+        Task<List<Appointment>> GetAllAppointmentsForConsultantAsync(User consultant);
 
         Task<List<Appointment>> GetAllAppointmentsForDateAsync(DateTime dateTime);
 

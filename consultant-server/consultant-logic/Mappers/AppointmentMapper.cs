@@ -13,6 +13,7 @@ namespace consultant_data.Mappers
             return new Appointment
             {
                 Id = Guid.Parse(appointment.Appointmentid),
+                CaseId = Guid.Parse(appointment.Caseid),
                 Title = appointment.Appointmenttitle,
                 AppointmentDateTime = appointment.Appointmentdatetime.GetValueOrDefault()
             };
@@ -23,6 +24,7 @@ namespace consultant_data.Mappers
             return new Database.Appointments
             {
                 Appointmentid = appointment.Id.ToString(),
+                Caseid = appointment.CaseId.ToString(),
                 Appointmenttitle = appointment.Title,
                 Appointmentdatetime = appointment.AppointmentDateTime
             };

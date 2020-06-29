@@ -8,10 +8,11 @@ using consultant_data.Database;
 using consultant_data.Mappers;
 using consultant_data.Models;
 using consultant_data.RepositoryInterfaces;
+using Microsoft.EntityFrameworkCore;
 
-namespace consultant_data.Repositories
+namespace consultant_logic.Repositories
 {
-    class CaseRepository
+    public class CaseRepository : ICaseRepository
     {
         private readonly khbatlzvContext _context;
 
@@ -24,7 +25,31 @@ namespace consultant_data.Repositories
         {
             try
             {
-                await _context.Cases.AddAsync(CaseMapper.Map(targetCase));
+                Cases c = _context.Cases.Add(CaseMapper.Map(targetCase)).Entity;
+
+                foreach (User user in targetCase.Clients)
+                {
+                    _context.Caseclient.Add(new Caseclient
+                    {
+                        Caseid = targetCase.Id.ToString(),
+                        Clientid = user.Id.ToString()
+                    });
+
+                    Users contextUser = await _context.Users.FirstOrDefaultAsync(u => u.Userid == user.Id.ToString());
+                    contextUser.Cases.Add(c);
+                    _context.Users.Update(contextUser);
+                }
+
+                foreach (Appointment a in targetCase.UpcomingAppointments)
+                {
+                    _context.Appointments.Add(AppointmentMapper.Map(a));
+                }
+
+                foreach (CaseNote cn in targetCase.Notes)
+                {
+                    _context.Casenotes.Add(CaseNoteMapper.Map(cn));
+                }
+
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -38,7 +63,18 @@ namespace consultant_data.Repositories
         {
             try
             {
-                return CaseMapper.Map(await _context.Cases.FindAsync(caseId.ToString()));
+                Case aCase = CaseMapper.Map(await _context.Cases
+                    .Include(c => c.Appointments)
+                    .Include(c => c.Casenotes)
+                    .FirstOrDefaultAsync(c => c.Caseid == caseId.ToString()));
+
+                List<Caseclient> caseClients = _context.Caseclient.Where(cc => cc.Caseid == caseId.ToString()).ToList();
+                foreach (Caseclient cc in caseClients)
+                {
+                    aCase.Clients.Add(UserMapper.Map(_context.Users.FirstOrDefault(u => u.Userid == cc.Clientid)));
+                }
+
+                return aCase;
             }
             catch (Exception e)
             {
@@ -46,11 +82,14 @@ namespace consultant_data.Repositories
             }
         }
 
-        public async Task<List<Case>> GetAllCasesForConsultantAsync(Consultant consultant)
+        public async Task<List<Case>> GetAllCasesForConsultantAsync(User consultant)
         {
             try
             {
-                return _context.Cases.Where(c => c.Activeconsultant.Consultantid == consultant.Id.ToString())
+                return _context.Cases
+                    .Include(c => c.Appointments)
+                    .Include(c => c.Casenotes)
+                    .Where(c => c.Activeconsultant.Userid == consultant.Id.ToString())
                     .Select(CaseMapper.Map)
                     .ToList();
             }
@@ -64,7 +103,18 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Cases.Update(CaseMapper.Map(targetCase));
+                _context.Cases.Update(_context.Cases.FirstOrDefault(c => c.Caseid == targetCase.ToString()));
+
+                foreach (Appointment appointment in targetCase.UpcomingAppointments)
+                {
+                    _context.Appointments.Update(_context.Appointments.FirstOrDefault(a => a.Appointmentid == appointment.Id.ToString()));
+                }
+
+                foreach (CaseNote note in targetCase.Notes)
+                {
+                    _context.Casenotes.Update(_context.Casenotes.FirstOrDefault(a => a.Noteid == note.Id.ToString()));
+                }
+
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -78,7 +128,29 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Cases.Remove(CaseMapper.Map(targetCase));
+                // Delete all entries in appointment
+                foreach (Appointment appointment in targetCase.UpcomingAppointments)
+                {
+                    _context.Appointments.Remove(_context.Appointments.FirstOrDefault(a => a.Appointmentid == appointment.Id.ToString()));
+                }
+
+                // Next, delete all entries in casenote
+                foreach (CaseNote note in targetCase.Notes)
+                {
+                    _context.Casenotes.Remove(_context.Casenotes.FirstOrDefault(a => a.Noteid == note.Id.ToString()));
+                }
+
+                // Next, delete all entries in caseclient
+                foreach (User client in targetCase.Clients)
+                {
+                    Caseclient cc = _context.Caseclient.FirstOrDefault(cc => cc.Caseid == targetCase.Id.ToString());
+                    if (cc != null)
+                        _context.Caseclient.Remove(cc);
+                }
+
+                // Finally, remove the case
+                _context.Cases.Remove(_context.Cases.FirstOrDefault(c => c.Caseid == targetCase.Id.ToString()));
+
                 await _context.SaveChangesAsync();
                 return true;
             }

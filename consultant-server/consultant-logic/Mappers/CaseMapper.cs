@@ -16,7 +16,8 @@ namespace consultant_data.Mappers
                 Id = Guid.Parse(targetCase.Caseid),
                 Title = targetCase.Casetitle,
                 Status = CaseStatusMapper.Map(targetCase.Currentstatus),
-                UpcomingApointments = targetCase.Appointments.Select(AppointmentMapper.Map).ToList()
+                UpcomingAppointments = targetCase.Appointments.Select(AppointmentMapper.Map).ToList(),
+                Notes = targetCase.Casenotes.Select(CaseNoteMapper.Map).ToList()
             };
         }
 
@@ -25,6 +26,7 @@ namespace consultant_data.Mappers
             return new Database.Cases
             {
                 Caseid = targetCase.Id.ToString(),
+                Casetitle = targetCase.Title,
                 Activeconsultantid = targetCase.ActiveConsultant.Id.ToString(),
                 Currentstatusid = targetCase.Status.Id.ToString()
             };

@@ -10,9 +10,9 @@ using consultant_data.Models;
 using consultant_data.RepositoryInterfaces;
 
 
-namespace consultant_data.Repositories
+namespace consultant_logic.Repositories
 {
-    class CaseStatusRepository
+    public class CaseStatusRepository : ICaseStatusRepository
     {
         private readonly khbatlzvContext _context;
 
@@ -25,7 +25,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                await _context.Casestatuses.AddAsync(CaseStatusMapper.Map(caseStatus));
+                _context.Casestatuses.Add(CaseStatusMapper.Map(caseStatus));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -63,7 +63,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Casestatuses.Update(CaseStatusMapper.Map(caseStatus));
+                _context.Casestatuses.Update(_context.Casestatuses.FirstOrDefault(C => C.Statusid == caseStatus.Id.ToString()));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -77,7 +77,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Casestatuses.Remove(CaseStatusMapper.Map(caseStatus));
+                _context.Casestatuses.Remove(_context.Casestatuses.FirstOrDefault(C => C.Statusid == caseStatus.Id.ToString()));
                 await _context.SaveChangesAsync();
                 return true;
             }

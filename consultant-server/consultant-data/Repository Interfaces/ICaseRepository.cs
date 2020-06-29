@@ -12,7 +12,7 @@ namespace consultant_data.RepositoryInterfaces
 
         Task<Case> GetCaseByIdAsync(Guid caseId);
 
-        Task<List<Case>> GetAllCasesForConsultantAsync(Consultant consultant);
+        Task<List<Case>> GetAllCasesForConsultantAsync(User consultant);
 
         Task<bool> UpdateCaseAsync(Case targetCase);
 

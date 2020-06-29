@@ -20,9 +20,8 @@ namespace consultant_data.Database
         public virtual DbSet<Casenotes> Casenotes { get; set; }
         public virtual DbSet<Cases> Cases { get; set; }
         public virtual DbSet<Casestatuses> Casestatuses { get; set; }
-        public virtual DbSet<Clients> Clients { get; set; }
-        public virtual DbSet<Consultants> Consultants { get; set; }
         public virtual DbSet<PgStatStatements> PgStatStatements { get; set; }
+        public virtual DbSet<Users> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -88,7 +87,8 @@ namespace consultant_data.Database
 
             modelBuilder.Entity<Caseclient>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => new { e.Caseid, e.Clientid })
+                    .HasName("caseclient_pkey");
 
                 entity.ToTable("caseclient");
 
@@ -101,21 +101,28 @@ namespace consultant_data.Database
                     .HasMaxLength(40);
 
                 entity.HasOne(d => d.Case)
-                    .WithMany()
+                    .WithMany(p => p.Caseclient)
                     .HasForeignKey(d => d.Caseid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("caseclient_caseid_fkey");
 
                 entity.HasOne(d => d.Client)
-                    .WithMany()
+                    .WithMany(p => p.Caseclient)
                     .HasForeignKey(d => d.Clientid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("caseclient_clientid_fkey");
             });
 
             modelBuilder.Entity<Casenotes>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => e.Noteid)
+                    .HasName("casenotes_pkey");
 
                 entity.ToTable("casenotes");
+
+                entity.Property(e => e.Noteid)
+                    .HasColumnName("noteid")
+                    .HasMaxLength(40);
 
                 entity.Property(e => e.Caseid)
                     .HasColumnName("caseid")
@@ -125,12 +132,8 @@ namespace consultant_data.Database
                     .HasColumnName("content")
                     .HasMaxLength(255);
 
-                entity.Property(e => e.Noteid)
-                    .HasColumnName("noteid")
-                    .HasMaxLength(40);
-
                 entity.HasOne(d => d.Case)
-                    .WithMany()
+                    .WithMany(p => p.Casenotes)
                     .HasForeignKey(d => d.Caseid)
                     .HasConstraintName("casenotes_caseid_fkey");
             });
@@ -182,58 +185,6 @@ namespace consultant_data.Database
 
                 entity.Property(e => e.Statustext)
                     .HasColumnName("statustext")
-                    .HasMaxLength(100);
-            });
-
-            modelBuilder.Entity<Clients>(entity =>
-            {
-                entity.HasKey(e => e.Clientid)
-                    .HasName("clients_pkey");
-
-                entity.ToTable("clients");
-
-                entity.Property(e => e.Clientid)
-                    .HasColumnName("clientid")
-                    .HasMaxLength(40);
-
-                entity.Property(e => e.Email)
-                    .HasColumnName("email")
-                    .HasMaxLength(100);
-
-                entity.Property(e => e.Firstname)
-                    .HasColumnName("firstname")
-                    .HasMaxLength(100);
-
-                entity.Property(e => e.Lastname)
-                    .HasColumnName("lastname")
-                    .HasMaxLength(100);
-
-                entity.Property(e => e.Middlename)
-                    .HasColumnName("middlename")
-                    .HasMaxLength(100);
-            });
-
-            modelBuilder.Entity<Consultants>(entity =>
-            {
-                entity.HasKey(e => e.Consultantid)
-                    .HasName("consultants_pkey");
-
-                entity.ToTable("consultants");
-
-                entity.Property(e => e.Consultantid)
-                    .HasColumnName("consultantid")
-                    .HasMaxLength(40);
-
-                entity.Property(e => e.Firstname)
-                    .HasColumnName("firstname")
-                    .HasMaxLength(100);
-
-                entity.Property(e => e.Lastname)
-                    .HasColumnName("lastname")
-                    .HasMaxLength(100);
-
-                entity.Property(e => e.Middlename)
-                    .HasColumnName("middlename")
                     .HasMaxLength(100);
             });
 
@@ -292,6 +243,34 @@ namespace consultant_data.Database
                 entity.Property(e => e.Userid)
                     .HasColumnName("userid")
                     .HasColumnType("oid");
+            });
+
+            modelBuilder.Entity<Users>(entity =>
+            {
+                entity.HasKey(e => e.Userid)
+                    .HasName("users_pkey");
+
+                entity.ToTable("users");
+
+                entity.Property(e => e.Userid)
+                    .HasColumnName("userid")
+                    .HasMaxLength(40);
+
+                entity.Property(e => e.Email)
+                    .HasColumnName("email")
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Firstname)
+                    .HasColumnName("firstname")
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Lastname)
+                    .HasColumnName("lastname")
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Middlename)
+                    .HasColumnName("middlename")
+                    .HasMaxLength(100);
             });
 
             OnModelCreatingPartial(modelBuilder);

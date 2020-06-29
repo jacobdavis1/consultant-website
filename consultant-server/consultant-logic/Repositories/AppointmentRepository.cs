@@ -9,7 +9,7 @@ using consultant_data.Mappers;
 using consultant_data.Models;
 using consultant_data.RepositoryInterfaces;
 
-namespace consultant_data.Repositories
+namespace consultant_logic.Repositories
 {
     public class AppointmentRepository : IAppointmentRepository
     {
@@ -17,14 +17,14 @@ namespace consultant_data.Repositories
 
         public AppointmentRepository(khbatlzvContext context)
         {
-            context = _context;
+            _context = context;
         }
 
         public async Task<bool> AddAppointmentAsync(Appointment appointment)
         {
             try
             {
-                await _context.Appointments.AddAsync(AppointmentMapper.Map(appointment));
+                _context.Appointments.Add(AppointmentMapper.Map(appointment));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -47,7 +47,7 @@ namespace consultant_data.Repositories
             }
         }
 
-        public async Task<List<Appointment>> GetAllAppointmentsForConsultantAsync(Consultant consultant)
+        public async Task<List<Appointment>> GetAllAppointmentsForConsultantAsync(User consultant)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Appointments.Update(AppointmentMapper.Map(appointment));
+                _context.Appointments.Update(_context.Appointments.FirstOrDefault(a => a.Appointmentid == appointment.Id.ToString()));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -95,7 +95,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Appointments.Remove(AppointmentMapper.Map(appointment));
+                _context.Appointments.Remove(_context.Appointments.FirstOrDefault(a => a.Appointmentid == appointment.Id.ToString()));
                 await _context.SaveChangesAsync();
                 return true;
             }

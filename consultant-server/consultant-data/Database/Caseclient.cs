@@ -9,6 +9,6 @@ namespace consultant_data.Database
         public string Clientid { get; set; }
 
         public virtual Cases Case { get; set; }
-        public virtual Clients Client { get; set; }
+        public virtual Users Client { get; set; }
     }
 }

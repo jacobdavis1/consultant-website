@@ -13,6 +13,7 @@ namespace consultant_data.Mappers
             return new CaseNote
             {
                 Id = Guid.Parse(caseNote.Noteid),
+                CaseId = Guid.Parse(caseNote.Caseid),
                 Content = caseNote.Content
             };
         }
@@ -22,6 +23,7 @@ namespace consultant_data.Mappers
             return new Database.Casenotes
             {
                 Noteid = caseNote.Id.ToString(),
+                Caseid = caseNote.CaseId.ToString(),
                 Content = caseNote.Content
             };
         }

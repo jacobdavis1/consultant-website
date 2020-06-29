@@ -23,6 +23,11 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "consultant-test", "consulta
 		{DFBD89A5-6A8B-4E96-9093-07671B2B6025} = {DFBD89A5-6A8B-4E96-9093-07671B2B6025}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "consultant-console", "..\consultant-console\consultant-console.csproj", "{22AA4AF1-1B0D-49F2-9460-2B86F6B05FE2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1BFCFF11-A131-41E9-A0A0-07FABB14A543} = {1BFCFF11-A131-41E9-A0A0-07FABB14A543}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +50,10 @@ Global
 		{B273D9DA-A8AF-4BB7-BD43-7FA736B3B763}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B273D9DA-A8AF-4BB7-BD43-7FA736B3B763}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B273D9DA-A8AF-4BB7-BD43-7FA736B3B763}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22AA4AF1-1B0D-49F2-9460-2B86F6B05FE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22AA4AF1-1B0D-49F2-9460-2B86F6B05FE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22AA4AF1-1B0D-49F2-9460-2B86F6B05FE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22AA4AF1-1B0D-49F2-9460-2B86F6B05FE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,9 +9,9 @@ using consultant_data.Mappers;
 using consultant_data.Models;
 using consultant_data.RepositoryInterfaces;
 
-namespace consultant_data.Repositories
+namespace consultant_logic.Repositories
 {
-    class CaseNoteRepository
+    public class CaseNoteRepository : ICaseNoteRepository
     {
         private readonly khbatlzvContext _context;
 
@@ -24,7 +24,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                await _context.Casenotes.AddAsync(CaseNoteMapper.Map(note));
+                _context.Casenotes.Add(CaseNoteMapper.Map(note));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -64,7 +64,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Casenotes.Update(CaseNoteMapper.Map(note));
+                _context.Casenotes.Update(_context.Casenotes.FirstOrDefault(n => n.Noteid == note.Id.ToString()));
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -78,7 +78,7 @@ namespace consultant_data.Repositories
         {
             try
             {
-                _context.Casenotes.Remove(CaseNoteMapper.Map(note));
+                _context.Casenotes.Remove(_context.Casenotes.FirstOrDefault(n => n.Noteid == note.Id.ToString()));
                 await _context.SaveChangesAsync();
                 return true;
             }

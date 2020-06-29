@@ -3,11 +3,12 @@ Scaffold-DbContext "Host=<database site, eg drona.elephantsql.com>;Database=<dat
 
 High-level Table Structures:
 
- Consultant
- - consultantId (primary key)
+User
+ - userId (primary key)
  - firstName
  - middleName
  - lastName
+ - email
 
  CaseStatus
  - statusId (primary key)
@@ -30,13 +31,6 @@ High-level Table Structures:
  - appointmentDateTime
  - appointmentTitle
 
- Client
- - clientId (primary key)
- - firstName
- - middleName
- - lastName
- - email
-
- CaseClient
- - caseId (foreign key)
+ CaseUser
+ - caseId (foreign key, primary key)
  - clientId (foreign key)
