@@ -22,7 +22,7 @@ namespace consultant_logic.Repositories
             _context = context;
         }
 
-        public async Task<bool> AddCaseAsync(Case targetCase)
+        public async Task<bool> AddCaseAsync(Case targetCase, bool save = true)
         {
             try
             {
@@ -46,16 +46,18 @@ namespace consultant_logic.Repositories
                 // Next, add all of the case's appointments, if any
                 foreach (Appointment a in targetCase.UpcomingAppointments)
                 {
-                    _context.Appointments.Add(AppointmentMapper.Map(a));
+                    await AddAppointmentToCaseAsync(targetCase, a, false);
                 }
 
                 // Finally, add all of the case's notes, if any
                 foreach (CaseNote cn in targetCase.Notes)
                 {
-                    _context.Casenotes.Add(CaseNoteMapper.Map(cn));
+                    await AddNoteToCaseAsync(targetCase, cn, false);
                 }
 
-                await _context.SaveChangesAsync();
+                if (save)
+                    await _context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception e)
@@ -109,7 +111,7 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<bool> UpdateCaseAsync(Case targetCase)
+        public async Task<bool> UpdateCaseAsync(Case targetCase, bool save = true)
         {
             try
             {
@@ -129,7 +131,10 @@ namespace consultant_logic.Repositories
                 dbCase.Casetitle = targetCase.Title;
 
                 _context.Cases.Update(dbCase);
-                await _context.SaveChangesAsync();
+
+                if (save)
+                    await _context.SaveChangesAsync();
+                
                 return true;
             }
             catch (Exception e)
@@ -138,7 +143,7 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<bool> DeleteCaseAsync(Case targetCase)
+        public async Task<bool> DeleteCaseAsync(Case targetCase, bool save = true)
         {
             try
             {
@@ -167,7 +172,9 @@ namespace consultant_logic.Repositories
                 // Finally, remove the case
                 _context.Cases.Remove(await _context.Cases.FirstOrDefaultAsync(c => c.Caseid == targetCase.Id.ToString()));
 
-                await _context.SaveChangesAsync();
+                if (save)
+                    await _context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception e)
@@ -178,7 +185,7 @@ namespace consultant_logic.Repositories
         #endregion;
 
         #region Appointments
-        public async Task<bool> AddAppointmentToCaseAsync(Case targetCase, Appointment appointment)
+        public async Task<bool> AddAppointmentToCaseAsync(Case targetCase, Appointment appointment, bool save = true)
         {
             try
             {
@@ -189,7 +196,9 @@ namespace consultant_logic.Repositories
                 // Finally, add the appointment to the case model's appointments
                 targetCase.UpcomingAppointments.Add(appointment);
 
-                await _context.SaveChangesAsync();
+                if (save)
+                    await _context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception e)
@@ -265,7 +274,7 @@ namespace consultant_logic.Repositories
             return null;
         }
 
-        public async Task<bool> UpdateAppointmentAsync(Appointment appointment)
+        public async Task<bool> UpdateAppointmentAsync(Appointment appointment, bool save = true)
         {
             try
             {
@@ -274,7 +283,10 @@ namespace consultant_logic.Repositories
                 dbAppointment.Appointmenttitle = appointment.Title;
 
                 _context.Appointments.Update(dbAppointment);
-                await _context.SaveChangesAsync();
+
+                if (save)
+                    await _context.SaveChangesAsync();
+                
                 return true;
             }
             catch (Exception e)
@@ -283,7 +295,7 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<bool> DeleteAppointmentFromCaseAsync(Case targetCase, Appointment appointment)
+        public async Task<bool> DeleteAppointmentFromCaseAsync(Case targetCase, Appointment appointment, bool save = true)
         {
             try
             {
@@ -292,7 +304,10 @@ namespace consultant_logic.Repositories
 
                 // Finally, remove the appointment
                 _context.Appointments.Remove(await _context.Appointments.FirstOrDefaultAsync(a => a.Appointmentid == appointment.Id.ToString()));
-                await _context.SaveChangesAsync();
+                
+                if (save)
+                    await _context.SaveChangesAsync();
+                
                 return true;
             }
             catch (Exception e)
@@ -304,7 +319,7 @@ namespace consultant_logic.Repositories
 
 
         #region Notes
-        public async Task<bool> AddNoteToCaseAsync(Case targetCase, CaseNote note)
+        public async Task<bool> AddNoteToCaseAsync(Case targetCase, CaseNote note, bool save = true)
         {
             try
             {
@@ -315,7 +330,9 @@ namespace consultant_logic.Repositories
                 // Finally, update the case model and db
                 targetCase.Notes.Add(note);
 
-                await _context.SaveChangesAsync();
+                if (save)
+                    await _context.SaveChangesAsync();
+                
                 return true;
             }
             catch (Exception e)
@@ -355,7 +372,7 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<bool> UpdateNoteAsync(CaseNote note)
+        public async Task<bool> UpdateNoteAsync(CaseNote note, bool save = true)
         {
             try
             {
@@ -363,7 +380,10 @@ namespace consultant_logic.Repositories
                 dbNote.Content = note.Content;
 
                 _context.Casenotes.Update(dbNote);
-                await _context.SaveChangesAsync();
+
+                if (save)
+                    await _context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception e)
@@ -372,7 +392,7 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<bool> DeleteNoteFromCaseAsync(Case targetCase, CaseNote note)
+        public async Task<bool> DeleteNoteFromCaseAsync(Case targetCase, CaseNote note, bool save = true)
         {
             try
             {
@@ -382,7 +402,9 @@ namespace consultant_logic.Repositories
                 // Finally, remove the note
                 _context.Casenotes.Remove(await _context.Casenotes.FirstOrDefaultAsync(n => n.Noteid == note.Id.ToString()));
 
-                await _context.SaveChangesAsync();
+                if (save)
+                    await _context.SaveChangesAsync();
+                
                 return true;
             }
             catch (Exception e)

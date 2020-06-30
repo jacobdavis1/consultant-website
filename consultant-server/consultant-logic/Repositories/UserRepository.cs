@@ -22,12 +22,15 @@ namespace consultant_logic.Repositories
             _context = context;
         }
 
-        public async Task<bool> AddUserAsync(User user)
+        public async Task<bool> AddUserAsync(User user, bool save = true)
         {
             try
             {
                 _context.Users.Add(UserMapper.Map(user));
-                await _context.SaveChangesAsync();
+
+                if (save)
+                    await _context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception e)
@@ -95,13 +98,16 @@ namespace consultant_logic.Repositories
             }
         } */
 
-        public async Task<bool> UpdateUserAsync(User user)
+        public async Task<bool> UpdateUserAsync(User user, bool save = true)
         {
             try
             {
                 // Update the User
                 _context.Users.Update(await _context.Users.FirstOrDefaultAsync(c => c.Userid == user.Id.ToString()));
-                await _context.SaveChangesAsync();
+
+                if (save)
+                    await _context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception e)
@@ -110,7 +116,7 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<bool> DeleteUserAsync(User user)
+        public async Task<bool> DeleteUserAsync(User user, bool save = true)
         {
             try
             {
@@ -125,7 +131,10 @@ namespace consultant_logic.Repositories
 
                 // Finally, remove the user
                 _context.Users.Remove(await _context.Users.FirstOrDefaultAsync(c => c.Userid == user.Id.ToString()));
-                await _context.SaveChangesAsync();
+
+                if (save)
+                    await _context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception e)

@@ -9,16 +9,16 @@ namespace consultant_data.RepositoryInterfaces
 {
     public interface IUserRepository
     {
-        Task<bool> AddUserAsync(User User);
+        Task<bool> AddUserAsync(User user, bool save = true);
 
-        Task<User> GetUserByIdAsync(Guid UserId);
+        Task<User> GetUserByIdAsync(Guid userId);
 
         Task<List<User>> SearchUsersByNameAsync(string firstName, string middleName, string lastName);
 
         Task<List<User>> GetAllUsersByCaseAsync(Case targetCase);
 
-        Task<bool> UpdateUserAsync(User User);
+        Task<bool> UpdateUserAsync(User user, bool save = true);
 
-        Task<bool> DeleteUserAsync(User User);
+        Task<bool> DeleteUserAsync(User user, bool save = true);
     }
 }
