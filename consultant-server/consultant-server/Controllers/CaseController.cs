@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using consultant_data.Database;
 using consultant_data.Models;
 using consultant_data.RepositoryInterfaces;
+using consultant_server.ServiceInterfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Npgsql.Logging;
 
 namespace consultant_server.Controllers
 {
@@ -19,22 +21,56 @@ namespace consultant_server.Controllers
     JwtBearerDefaults.AuthenticationScheme)]
     public class CaseController : ControllerBase
     {
+        private IUserRepository _user;
         private ICaseRepository _case;
         private IAppointmentRepository _appointment;
         private INoteRepository _note;
+        private IAuthProvider _auth;
 
-        public CaseController(ICaseRepository caseRepo, IAppointmentRepository appointment, INoteRepository note)
+        public CaseController(IUserRepository user, ICaseRepository caseRepo, IAppointmentRepository appointment, INoteRepository note, IAuthProvider auth)
         {
+            _user = user;
             _case = caseRepo;
             _appointment = appointment;
             _note = note;
+            _auth = auth;
         }
 
         // GET: api/Case
         [HttpGet("all", Name = "GetAllCases")]
-        public ActionResult<IEnumerable<Case>> GetAllCases()
+        public async Task<ActionResult<IEnumerable<Case>>> GetAllCases()
         {
-            return new List<Case> { new Case() };
+            try
+            {
+                string userId = _auth.GetUserIdFromToken(HttpContext);
+                User user = await _user.GetUserByIdAsync(userId);
+
+                if (user == null)
+                {
+                    user = new User
+                    {
+                        UserId = userId,
+                        Role = Role.Client
+                    };
+
+                    user = await _user.AddUserAsync(user);
+                }
+
+                if (user.Role.Text == "Consultant")
+                {
+                    return await _case.GetAllCasesForConsultantAsync(user);
+                }
+                else if (user.Role.Text == "Client")
+                {
+                    return user.Cases.ToList();
+                }
+                else
+                    return new List<Case> { new Case() };
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
         // GET: api/Case/5

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using consultant_data.Database;
 using consultant_data.RepositoryInterfaces;
 using consultant_logic.Repositories;
+using consultant_server.ServiceInterfaces;
+using consultant_server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -47,6 +49,8 @@ namespace consultant_server
             services.AddScoped<ICaseRepository, CaseRepository>();
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             services.AddScoped<INoteRepository, NoteRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IAuthProvider, Auth0Provider>();
 
             services.AddAuthentication(options =>
             {

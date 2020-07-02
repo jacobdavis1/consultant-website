@@ -46,6 +46,7 @@ namespace consultant_logic.Repositories
                 Users dbUser = await _context.Users
                     .Include(u => u.Cases).ThenInclude(c => c.Appointments)
                     .Include(u => u.Cases).ThenInclude(c => c.Casenotes)
+                    .Include(u => u.UserroleNavigation)
                     .FirstOrDefaultAsync(u => u.Userid == userId);
 
                 if (dbUser == null)
