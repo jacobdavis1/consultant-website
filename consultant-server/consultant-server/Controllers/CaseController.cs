@@ -15,29 +15,27 @@ using Npgsql.Logging;
 
 namespace consultant_server.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes =
-    JwtBearerDefaults.AuthenticationScheme)]
+        JwtBearerDefaults.AuthenticationScheme)]
     public class CaseController : ControllerBase
     {
         private IUserRepository _user;
         private ICaseRepository _case;
-        private IAppointmentRepository _appointment;
-        private INoteRepository _note;
         private IAuthProvider _auth;
+        private ICaseStatusRepository _status;
 
-        public CaseController(IUserRepository user, ICaseRepository caseRepo, IAppointmentRepository appointment, INoteRepository note, IAuthProvider auth)
+        public CaseController(IUserRepository user, ICaseRepository caseRepo, IAuthProvider auth, ICaseStatusRepository status)
         {
             _user = user;
             _case = caseRepo;
-            _appointment = appointment;
-            _note = note;
             _auth = auth;
+            _status = status;
         }
 
-        // GET: api/Case
-        [HttpGet("all", Name = "GetAllCases")]
+        //i.GET - /case/all - Get all cases for this client
+        [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<Case>>> GetAllCases()
         {
             try
@@ -46,56 +44,208 @@ namespace consultant_server.Controllers
                 User user = await _user.GetUserByIdAsync(userId);
 
                 if (user == null)
-                {
-                    user = new User
-                    {
-                        UserId = userId,
-                        Role = Role.Client
-                    };
+                    return Forbid();
 
-                    user = await _user.AddUserAsync(user);
-                }
-
-                if (user.Role.Text == "Consultant")
+                if (user.Role.Id == Role.Consultant.Id)
                 {
                     return await _case.GetAllCasesForConsultantAsync(user);
                 }
-                else if (user.Role.Text == "Client")
+                else if (user.Role.Id == Role.Client.Id)
                 {
-                    return user.Cases.ToList();
+                    return await _case.GetAllCasesForClientAsync(user);
                 }
                 else
-                    return new List<Case> { new Case() };
+                    return Forbid();
             }
             catch (Exception e)
             {
-                return null;
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
             }
         }
 
-        // GET: api/Case/5
-        [HttpGet("{id}", Name = "GetCase")]
-        public string GetCase(int id)
+        //ii. GET - /case/{caseId} - Get the case with this ID.
+        [HttpGet("{caseId}")]
+        public async Task<ActionResult<Case>> GetCase(int caseId)
         {
-            return "value";
+            try
+            {
+                string userId = _auth.GetUserIdFromToken(HttpContext);
+                User user = await _user.GetUserByIdAsync(userId);
+
+                if (user == null)
+                    return Forbid();
+
+                Case c = await _case.GetCaseByIdAsync(caseId);
+
+                if (c == null)
+                    return NotFound();
+
+                if (c.Clients.Contains(user) || user.Role.Id == Role.Consultant.Id)
+                    return c;
+                else
+                    return Forbid();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
         }
 
-        // POST: api/Case
-        [HttpPost]
-        public void PostCase([FromBody] string value)
+        //iii.PUT - /case/{caseId}/assignTo/{consultantId} - Reassign this case to the given consultant (auth, consultant)
+        [HttpPut("{caseId}/assignTo/{consultantId}")]
+        public async Task<ActionResult> ReassignCase(int caseId, int consultantId)
         {
+            try
+            {
+                string userId = _auth.GetUserIdFromToken(HttpContext);
+                User user = await _user.GetUserByIdAsync(userId);
+
+                if (user == null)
+                    return Forbid();
+
+                Case c = await _case.GetCaseByIdAsync(caseId);
+                User consultant = await _user.GetUserByRowIdAsync(consultantId);
+
+                if (c == null || consultant == null)
+                    return NotFound();
+
+                if (user.Role.Id == Role.Consultant.Id)
+                {
+                    c.ActiveConsultant = consultant;
+                    await _case.UpdateCaseAsync(c);
+                    return NoContent();
+                }
+                else
+                    return Forbid();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
         }
 
-        // PUT: api/Case/5
-        [HttpPut("{id}")]
-        public void PutCase(int id, [FromBody] string value)
+        //iv. PUT - /case/{caseId}/status?status={ newStatusText } - Update the status to a new status. A status that doesnt exist will get 404 (auth, consultant)
+        [HttpPut("{caseId}/status")]
+        public async Task<ActionResult> UpdateCaseStatus(int caseId, [FromQuery] string statusText)
         {
+            try
+            {
+                string userId = _auth.GetUserIdFromToken(HttpContext);
+                User user = await _user.GetUserByIdAsync(userId);
+
+                if (user == null)
+                    return Forbid();
+
+                Case c = await _case.GetCaseByIdAsync(caseId);
+                Status s = await _status.GetCaseStatusByTextAsync(statusText);
+
+                if (c == null || s == null)
+                    return NotFound();
+
+                if (user.Role.Id == Role.Consultant.Id)
+                {
+                    c.Status = s;
+                    await _case.UpdateCaseAsync(c);
+                    return NoContent();
+                }
+                else
+                    return Forbid();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
         }
 
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void DeleteCase(int id)
+        //v. PUT - /case/{caseId} - Update any aspect of a case with the given ID.
+        [HttpPut("{caseId}")]
+        public async Task<ActionResult> PutCase(int caseId, [FromBody] Case aCase)
         {
+            try
+            {
+                string userId = _auth.GetUserIdFromToken(HttpContext);
+                User user = await _user.GetUserByIdAsync(userId);
+
+                if (user == null)
+                    return Forbid();
+
+                Case c = await _case.GetCaseByIdAsync(caseId);
+                
+
+
+                if (c == null)
+                    return NotFound();
+
+                if (user.Role.Id == Role.Consultant.Id)
+                {
+                    c = aCase;
+                    await _case.UpdateCaseAsync(c);
+                    return NoContent();
+                }
+                else
+                    return Forbid();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
+        }
+
+        //vi.POST - /case/new - Create a new case for this client. Give it to the given consultant
+        [HttpPost("new")]
+        public async Task<ActionResult> PostCase([FromBody] Case aCase)
+        {
+            try
+            {
+                string userId = _auth.GetUserIdFromToken(HttpContext);
+                User user = await _user.GetUserByIdAsync(userId);
+
+                if (user == null)
+                    return Forbid();
+
+                if (user.Role.Id == Role.Consultant.Id)
+                {
+                    await _case.AddCaseAsync(aCase);
+                    return NoContent();
+                }
+                else
+                    return Forbid();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
+        }
+
+        //vii. DELETE - /case/{caseId} - Delete the case with this ID.
+        [HttpDelete("{caseId}")]
+        public async Task<ActionResult> DeleteCase(int caseId)
+        {
+            try
+            {
+                string userId = _auth.GetUserIdFromToken(HttpContext);
+                User user = await _user.GetUserByIdAsync(userId);
+
+                if (user == null)
+                    return Forbid();
+
+                Case c = await _case.GetCaseByIdAsync(caseId);
+
+                if (c == null)
+                    return NotFound();
+
+                if (user.Role.Id == Role.Consultant.Id)
+                {
+                    await _case.DeleteCaseAsync(c);
+                    return NoContent();
+                }
+                else
+                    return Forbid();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
         }
     }
 }

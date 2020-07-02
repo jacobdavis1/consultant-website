@@ -10,30 +10,32 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
 namespace consultant_server.Controllers
 {
     [Route("[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes =
         JwtBearerDefaults.AuthenticationScheme)]
-    public class AppointmentController : ControllerBase
+    public class NoteController : ControllerBase
     {
         private IUserRepository _user;
         private ICaseRepository _case;
-        private IAppointmentRepository _appointment;
+        private INoteRepository _note;
         private IAuthProvider _auth;
 
-        public AppointmentController(IUserRepository user, ICaseRepository caseRepo, IAppointmentRepository appointment, IAuthProvider auth)
+        public NoteController(IUserRepository user, ICaseRepository caseRepo, INoteRepository note, IAuthProvider auth)
         {
             _user = user;
             _case = caseRepo;
-            _appointment = appointment;
+            _note = note;
             _auth = auth;
         }
 
-        //i.GET - /appointment/{caseId}/all - Get all the appointments for this case
+        //i.GET - /note/{caseId}/all - Get all notes for this case
         [HttpGet("{caseId}/all")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAllAppointmentsForCase(int caseId)
+        public async Task<ActionResult<IEnumerable<Note>>> GetAllNotes(int caseId)
         {
             try
             {
@@ -49,7 +51,7 @@ namespace consultant_server.Controllers
 
                 if (aCase.Clients.Contains(user) || user.Role.Id == Role.Consultant.Id)
                 {
-                    return aCase.Appointments.ToList();
+                    return aCase.Notes.ToList();
                 }
                 else
                     return Forbid();
@@ -60,26 +62,26 @@ namespace consultant_server.Controllers
             }
         }
 
-        //ii.GET - /appointment/{caseId}/{appointmentId} - Get the appointment with this ID.
-        [HttpGet("{caseId}/{appointmentId}")]
-        public async Task<ActionResult<Appointment>> GetAppointmentById(int caseId, int appointmentId)
+        //ii.GET - /note/{caseId}/{noteId} - Get the note with this ID.
+        [HttpGet("{caseId}/{noteId}")]
+        public async Task<ActionResult<Note>> GetNoteById(int caseId, int noteId)
         {
             try
             {
                 string userId = _auth.GetUserIdFromToken(HttpContext);
                 User user = await _user.GetUserByIdAsync(userId);
                 Case aCase = await _case.GetCaseByIdAsync(caseId);
-                Appointment appointment = await _appointment.GetAppointmentByIdAsync(appointmentId);
+                Note note = await _note.GetNoteByIdAsync(noteId);
 
                 if (user == null)
                     return Forbid();
 
-                if (aCase == null || appointment == null)
+                if (aCase == null || note == null)
                     return NotFound();
 
                 if (aCase.Clients.Contains(user) || user.Role.Id == Role.Consultant.Id)
                 {
-                    return appointment;
+                    return note;
                 }
                 else
                     return Forbid();
@@ -89,10 +91,10 @@ namespace consultant_server.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, e);
             }
         }
-        
-        //iii.POST - /appointment/{caseId}/new - Create a new appointment for a given case. (auth)
+
+        //iii.POST - /note/{caseId}/new - Create a new note for this case with the enclosed data
         [HttpPost("{caseId}/new")]
-        public async Task<ActionResult> PostAppointmentToCase(int caseId, [FromBody] Appointment appointment)
+        public async Task<ActionResult> PostNoteToCase(int caseId, [FromBody] Note note)
         {
             try
             {
@@ -108,7 +110,7 @@ namespace consultant_server.Controllers
 
                 if (aCase.Clients.Contains(user) || user.Role.Id == Role.Consultant.Id)
                 {
-                    await _appointment.AddAppointmentToCaseAsync(aCase, appointment);
+                    await _note.AddNoteToCaseAsync(aCase, note);
                     return NoContent();
                 }
                 else
@@ -120,26 +122,26 @@ namespace consultant_server.Controllers
             }
         }
 
-        //iv.PUT - /appointment/{caseId}/{appointmentId} - Update this appointment with given datetime or name (auth, either consultant or related party)
-        [HttpPut("{caseId}/{appointmentId}")]
-        public async Task<ActionResult> PutAppointmentToCase(int caseId, int appointmentId, [FromBody] Appointment appointment)
+        //iv.PUT - /note/{caseId}/{noteId} - Update a note with the given noteId with the enclosed data. (consultant only)
+        [HttpPut("{caseId}/{noteId}")]
+        public async Task<ActionResult> PutNoteToCase(int caseId, int noteId, [FromBody] Note note)
         {
             try
             {
                 string userId = _auth.GetUserIdFromToken(HttpContext);
                 User user = await _user.GetUserByIdAsync(userId);
                 Case aCase = await _case.GetCaseByIdAsync(caseId);
-                Appointment existingAppointment = await _appointment.GetAppointmentByIdAsync(appointmentId);
+                Note existingNote = await _note.GetNoteByIdAsync(noteId);
 
                 if (user == null)
                     return Forbid();
 
-                if (aCase == null || existingAppointment == null)
+                if (aCase == null || existingNote == null)
                     return NotFound();
 
                 if (user.Role.Id == Role.Consultant.Id)
                 {
-                    await _appointment.UpdateAppointmentAsync(appointment);
+                    await _note.UpdateNoteAsync(note);
                     return NoContent();
                 }
                 else
@@ -151,26 +153,26 @@ namespace consultant_server.Controllers
             }
         }
 
-        //v. DELETE - /appointment/{caseId}/{appointmentId}/cancel - Cancels an appointment, deleting it from the server (auth)
-        [HttpDelete("{caseId}/{appointmentId}/cancel")]
-        public async Task<ActionResult> DeleteAppointmentFromCase(int caseId, int appointmentId)
+        //v.DELETE - /note/{caseId}/{noteId} - Delete the note with this ID. (consultant only)
+        [HttpDelete("{caseId}/{noteId}")]
+        public async Task<ActionResult> DeleteNoteFromCase(int caseId, int noteId)
         {
             try
             {
                 string userId = _auth.GetUserIdFromToken(HttpContext);
                 User user = await _user.GetUserByIdAsync(userId);
                 Case aCase = await _case.GetCaseByIdAsync(caseId);
-                Appointment appointment = await _appointment.GetAppointmentByIdAsync(appointmentId);
+                Note note = await _note.GetNoteByIdAsync(noteId);
 
                 if (user == null)
                     return Forbid();
 
-                if (aCase == null || appointment == null)
+                if (aCase == null || note == null)
                     return NotFound();
 
                 if (user.Role.Id == Role.Consultant.Id)
                 {
-                    await _appointment.DeleteAppointmentFromCaseAsync(aCase, appointment);
+                    await _note.DeleteNoteFromCaseAsync(aCase, note);
                     return NoContent();
                 }
                 else

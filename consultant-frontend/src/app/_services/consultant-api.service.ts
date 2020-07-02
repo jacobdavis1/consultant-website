@@ -21,7 +21,7 @@ export class ConsultantApiService {
 
   //GET    - /case/all - Get all cases for this client
   getAllClientCases$(): Observable<any[]> {
-    return this.client.get<any[]>(`${this.endpointOrigin}/api/case/all`);
+    return this.client.get<any[]>(`${this.endpointOrigin}/case/all`);
   }
 
   //getAllCases()

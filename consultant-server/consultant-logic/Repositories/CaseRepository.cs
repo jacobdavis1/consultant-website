@@ -34,6 +34,7 @@ namespace consultant_logic.Repositories
                 // Add the case
                 Cases dbCase = _context.Cases.Add(CaseMapper.Map(targetCase)).Entity;
                 await _context.SaveChangesAsync();
+                dbCase.Currentstatus = await _context.Casestatuses.FirstOrDefaultAsync(s => s.Statusid == dbCase.Currentstatusid);
 
                 // Next, add the caseclient entry for every client
                 foreach (User user in targetCase.Clients)
@@ -79,6 +80,7 @@ namespace consultant_logic.Repositories
                 Cases dbCase = await _context.Cases
                     .Include(c => c.Appointments)
                     .Include(c => c.Casenotes)
+                    .Include(c => c.Currentstatus)
                     .FirstOrDefaultAsync(c => c.Caseid == caseId);
 
                 if (dbCase == null)
@@ -105,11 +107,30 @@ namespace consultant_logic.Repositories
             try
             {
                 return _context.Cases
+                    .Include(c => c.Activeconsultant)
                     .Include(c => c.Appointments)
                     .Include(c => c.Casenotes)
+                    .Include(c => c.Currentstatus)
                     .Where(c => c.Activeconsultant.Rowid == consultant.Id)
                     .Select(CaseMapper.Map)
                     .ToList();
+            }
+            catch (Exception e)
+            {
+                return new List<Case>();
+            }
+        }
+
+        public async Task<List<Case>> GetAllCasesForClientAsync(User client)
+        {
+            try
+            {
+                Users dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Rowid == client.Id);
+
+                return dbUser.Cases
+                    .Select(CaseMapper.Map)
+                    .ToList();
+
             }
             catch (Exception e)
             {

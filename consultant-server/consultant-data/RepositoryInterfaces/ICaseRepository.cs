@@ -14,6 +14,8 @@ namespace consultant_data.RepositoryInterfaces
 
         Task<List<Case>> GetAllCasesForConsultantAsync(User consultant);
 
+        Task<List<Case>> GetAllCasesForClientAsync(User client);
+
         Task<Case> UpdateCaseAsync(Case targetCase, bool save = true);
 
         Task<bool> DeleteCaseAsync(Case targetCase, bool save = true);

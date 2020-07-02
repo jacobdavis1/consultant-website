@@ -14,6 +14,7 @@ namespace consultant_data.Mappers
             return new Case
             {
                 Id = targetCase.Caseid,
+                ActiveConsultant = UserMapper.Map(targetCase.Activeconsultant),
                 Title = targetCase.Casetitle,
                 Status = CaseStatusMapper.Map(targetCase.Currentstatus),
                 Appointments = targetCase.Appointments.Select(AppointmentMapper.Map).ToList(),

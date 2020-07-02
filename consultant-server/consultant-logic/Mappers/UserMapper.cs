@@ -16,8 +16,7 @@ namespace consultant_data.Mappers
             {
                 Id = user.Rowid,
                 UserId = user.Userid,
-                Role = RoleMapper.Map(user.UserroleNavigation),
-                Cases = user.Cases.Select(CaseMapper.Map).ToList()
+                Role = RoleMapper.Map(user.UserroleNavigation)
             };
 
             return newUser;

@@ -17,6 +17,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NSwag;
+using NSwag.Generation.Processors.Security;
 
 namespace consultant_server
 {
@@ -47,6 +49,7 @@ namespace consultant_server
             services.AddDbContext<khbatlzvContext>(/*Put future config here*/);
 
             services.AddScoped<ICaseRepository, CaseRepository>();
+            services.AddScoped<ICaseStatusRepository, CaseStatusRepository>();
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             services.AddScoped<INoteRepository, NoteRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
@@ -70,6 +73,17 @@ namespace consultant_server
                 options.AddPolicy("AllAppointments",
                     policy => policy.RequireClaim("permissions", "appointments:all"));
             });
+
+            services.AddSwaggerDocument(config => {
+                config.DocumentProcessors.Add(new SecurityDefinitionAppender("JWT Token",
+                    new OpenApiSecurityScheme
+                    {
+                        Type = OpenApiSecuritySchemeType.ApiKey,
+                        Name = "Authorization",
+                        Description = "Copy 'Bearer ' + valid JWT token into field",
+                        In = OpenApiSecurityApiKeyLocation.Header
+                    }));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -92,6 +106,9 @@ namespace consultant_server
             {
                 endpoints.MapControllers();
             });
+
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
         }
     }
 }
