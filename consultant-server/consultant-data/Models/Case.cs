@@ -6,12 +6,12 @@ namespace consultant_data.Models
 {
     public class Case
     {
-        public Guid Id { get; set;}
+        public int Id { get; set;}
         public User ActiveConsultant { get; set; }
-        public CaseStatus Status { get; set; }
+        public Status Status { get; set; }
         public string Title { get; set; }
         public List<User> Clients { get; set; } = new List<User>();
-        public List<Appointment> UpcomingAppointments { get; set; } = new List<Appointment>();
-        public List<CaseNote> Notes { get; set; } = new List<CaseNote>();
+        public List<Appointment> Appointments { get; set; } = new List<Appointment>();
+        public List<Note> Notes { get; set; } = new List<Note>();
     }
 }

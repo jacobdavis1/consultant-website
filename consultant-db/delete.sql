@@ -9,3 +9,5 @@ DROP TABLE Cases;
 DROP TABLE CaseStatuses;
 
 DROP TABLE Users;
+
+DROP TABLE Roles;

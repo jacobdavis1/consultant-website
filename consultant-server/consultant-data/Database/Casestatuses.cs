@@ -10,7 +10,7 @@ namespace consultant_data.Database
             Cases = new HashSet<Cases>();
         }
 
-        public string Statusid { get; set; }
+        public int Statusid { get; set; }
         public string Statustext { get; set; }
 
         public virtual ICollection<Cases> Cases { get; set; }

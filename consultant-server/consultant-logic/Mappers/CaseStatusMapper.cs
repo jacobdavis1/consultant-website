@@ -8,20 +8,20 @@ namespace consultant_data.Mappers
 {
     public class CaseStatusMapper
     {
-        public static CaseStatus Map(Database.Casestatuses caseStatus)
+        public static Status Map(Database.Casestatuses caseStatus)
         {
-            return new CaseStatus
+            return new Status
             {
-                Id = Guid.Parse(caseStatus.Statusid),
+                Id = caseStatus.Statusid,
                 Text = caseStatus.Statustext
             };
         }
 
-        public static Database.Casestatuses Map(CaseStatus caseStatus)
+        public static Database.Casestatuses Map(Status caseStatus)
         {
             return new Database.Casestatuses
             {
-                Statusid = caseStatus.Id.ToString(),
+                Statusid = caseStatus.Id,
                 Statustext = caseStatus.Text
             };
         }

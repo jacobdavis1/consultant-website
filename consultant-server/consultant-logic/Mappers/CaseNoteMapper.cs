@@ -8,22 +8,22 @@ namespace consultant_data.Mappers
 {
     public class CaseNoteMapper
     {
-        public static CaseNote Map(Database.Casenotes caseNote)
+        public static Note Map(Database.Casenotes caseNote)
         {
-            return new CaseNote
+            return new Note
             {
-                Id = Guid.Parse(caseNote.Noteid),
-                CaseId = Guid.Parse(caseNote.Caseid),
+                Id = caseNote.Noteid,
+                CaseId = caseNote.Caseid ?? -1,
                 Content = caseNote.Content
             };
         }
 
-        public static Database.Casenotes Map(CaseNote caseNote)
+        public static Database.Casenotes Map(Note caseNote)
         {
             return new Database.Casenotes
             {
-                Noteid = caseNote.Id.ToString(),
-                Caseid = caseNote.CaseId.ToString(),
+                Noteid = caseNote.Id,
+                Caseid = caseNote.CaseId,
                 Content = caseNote.Content
             };
         }

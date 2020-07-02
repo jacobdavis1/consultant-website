@@ -12,10 +12,10 @@ namespace consultant_data.Database
             Casenotes = new HashSet<Casenotes>();
         }
 
-        public string Caseid { get; set; }
+        public int Caseid { get; set; }
         public string Casetitle { get; set; }
-        public string Activeconsultantid { get; set; }
-        public string Currentstatusid { get; set; }
+        public int? Activeconsultantid { get; set; }
+        public int? Currentstatusid { get; set; }
 
         public virtual Users Activeconsultant { get; set; }
         public virtual Casestatuses Currentstatus { get; set; }

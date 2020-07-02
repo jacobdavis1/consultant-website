@@ -1,16 +1,31 @@
-# consultant-website
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-## Current Status
- Basic functionalities live-tested via console runner.
- Authentication implemented via Auth0.
- Db rework in progress to take advantage of Auth0 identity values and remove all PII from consultant-website db.
- Design will be identity-service-agnostic, in case a different auth service is used in the future.
+@Injectable({
+  providedIn: 'root'
+})
+export class ConsultantApiService {
 
-## Planned controllers and endpoints
-  
-  ### Case 
-      i. GET    - /case/all - Get all cases for this client
-     ii. GET    - /case/consultant/all - Get all cases for this consultant
+  private endpointOrigin = `https://localhost:5001`;
+
+  constructor(private client: HttpClient) {
+
+  }
+
+  /* getUserRoles$(userId: string): Observable<Auth0Role[]> {
+    return this.client.get<Auth0Role[]>(`${this.endpointOrigin}/api/v2/users/${userId}/roles`);
+  } */
+
+  // Case endpoints
+
+  //GET    - /case/all - Get all cases for this client
+  getAllClientCases$(): Observable<any[]> {
+    return this.client.get<any[]>(`${this.endpointOrigin}/api/case/all`);
+  }
+
+  //getAllCases()
+     /*ii. GET    - /case/consultant/all - Get all cases for this consultant
     iii. GET    - /case/{caseId} - Get the case with this ID.
      iv. PUT    - /case/{caseId}/assignTo/{consultantId} - Reassign this case to the given consultant (auth, consultant)
       v. PUT    - /case/{caseId}/status?status={newStatusText} - Update the status to a new status. A status that doesnt exist will get 404 (auth, consultant)
@@ -29,18 +44,5 @@
      ii. GET    - /note/{noteId} - Get the note with this ID.
     iii. POST   - /note/new - Create a new note for this case with the enclosed data
      iv. PUT    - /note/{noteId} - Update a note with the given noteId with the enclosed data
-      v. DELETE - /note/{noteId} - Delete the note with this ID.
- 
-
-## Roadmap
- ### Implement Basic User Stories
- Two user stories to implement:
-   1. I, as a consultant, want to log in and review my cases.
-   2. I, as a client, want to log in and review my current cases or start a new case.
-
- ### Future User Stories
-   1. I, as a client, want to log in and upload files relevant to my case
-   2. I, as a client, want to schedule an appointment
-   3. I, as a consultant, want to review my appointments
-   4. I, as a consultant, want to reschedule my appointments
-   5. I, as a client, want to reschedule or cancel my appointment
+      v. DELETE - /note/{noteId} - Delete the note with this ID.*/
+}

@@ -1,38 +1,58 @@
+-- Create tables
+CREATE TABLE Roles (
+    roleId int GENERATED ALWAYS AS IDENTITY
+    , roleText varchar(100) NOT NULL
+    , PRIMARY KEY (roleId)
+);
+
 CREATE TABLE Users (
-    userId varchar(40) PRIMARY KEY
-    , firstName varchar(100)
-    , middleName varchar(100)
-    , lastName varchar(100)
-    , email varchar(100)
+    rowId int GENERATED ALWAYS AS IDENTITY
+    , userId varchar(40) NOT NULL
+    , userRole int REFERENCES Roles(roleId) NOT NULL
+    , PRIMARY KEY (rowId)
 );
 
 CREATE TABLE CaseStatuses (
-    statusId varchar(40) PRIMARY KEY
-    , statusText varchar(100)
+    statusId int GENERATED ALWAYS AS IDENTITY
+    , statusText varchar(100) NOT NULL
+    , PRIMARY KEY (statusId)
 );
 
 CREATE TABLE Cases (
-    caseId varchar(40) PRIMARY KEY
+    caseId int GENERATED ALWAYS AS IDENTITY
     , caseTitle varchar(100)
-    , activeConsultantId varchar(40) REFERENCES Users(userId)
-    , currentStatusId varchar(40) REFERENCES CaseStatuses(statusId)
+    , activeConsultantId int REFERENCES Users(rowId) 
+    , currentStatusId int REFERENCES CaseStatuses(statusId)
+    , PRIMARY KEY (caseId)
 );
 
 CREATE TABLE CaseNotes (
-    noteId varchar(40) PRIMARY KEY
-    , caseId varchar(40) REFERENCES Cases(caseId)
+    noteId int GENERATED ALWAYS AS IDENTITY
+    , caseId int REFERENCES Cases(caseId)
     , content varchar(255)
+    , PRIMARY KEY (noteId)
 );
 
 CREATE TABLE Appointments (
-    appointmentId varchar(40) PRIMARY KEY
-    , caseId varchar(40) REFERENCES Cases(caseId)
-    , appointmentDateTime timestamptz
-    , appointmentTitle varchar(100)
+    appointmentId int GENERATED ALWAYS AS IDENTITY
+    , caseId int REFERENCES Cases(caseId)
+    , appointmentDateTime timestamptz NOT NULL
+    , appointmentTitle varchar(100) NOT NULL
+    , PRIMARY KEY (appointmentId)
 );
 
 CREATE TABLE CaseClient (
-    caseId varchar(40) REFERENCES Cases(caseId)
-    , clientId varchar(40) REFERENCES Users(userId)
-    , PRIMARY KEY (caseId, clientId)
+    rowId int GENERATED ALWAYS AS IDENTITY
+    , caseId int REFERENCES Cases(caseId)
+    , clientId int REFERENCES Users(rowId)
+    , PRIMARY KEY (rowId)
 );
+
+-- Insert base roles and statuses
+INSERT INTO Roles (roleText) VALUES ('Consultant');
+INSERT INTO Roles (roleText) VALUES ('Client');
+
+INSERT INTO CaseStatuses (statusText) VALUES ('Unassigned');
+INSERT INTO CaseStatuses (statusText) VALUES ('Assigned');
+INSERT INTO CaseStatuses (statusText) VALUES ('Awaiting Documentation');
+INSERT INTO CaseStatuses (statusText) VALUES ('Complete');

@@ -6,8 +6,8 @@ namespace consultant_data.Models
 {
     public class Appointment
     {
-        public Guid Id { get; set; }
-        public Guid CaseId { get; set; }
+        public int Id { get; set; }
+        public int CaseId { get; set; }
         public DateTime AppointmentDateTime { get; set; }
         public string Title { get; set; }
     }

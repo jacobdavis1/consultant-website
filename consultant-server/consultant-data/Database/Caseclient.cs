@@ -5,8 +5,9 @@ namespace consultant_data.Database
 {
     public partial class Caseclient
     {
-        public string Caseid { get; set; }
-        public string Clientid { get; set; }
+        public int Rowid { get; set; }
+        public int? Caseid { get; set; }
+        public int? Clientid { get; set; }
 
         public virtual Cases Case { get; set; }
         public virtual Users Client { get; set; }

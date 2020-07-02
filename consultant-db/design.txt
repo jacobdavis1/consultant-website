@@ -3,12 +3,14 @@ Scaffold-DbContext "Host=<database site, eg drona.elephantsql.com>;Database=<dat
 
 High-level Table Structures:
 
+Roles
+ - roleId (pk, generated)
+ - roleText
+
 User
- - userId (primary key)
- - firstName
- - middleName
- - lastName
- - email
+ - rowId (primary key, generated)
+ - userId
+ - roleId
 
  CaseStatus
  - statusId (primary key)

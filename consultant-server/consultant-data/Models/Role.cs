@@ -4,9 +4,9 @@ using System.Text;
 
 namespace consultant_data.Models
 {
-    public class CaseStatus
+    public class Role
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string Text { get; set; }
     }
 }

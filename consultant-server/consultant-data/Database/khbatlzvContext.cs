@@ -21,6 +21,7 @@ namespace consultant_data.Database
         public virtual DbSet<Cases> Cases { get; set; }
         public virtual DbSet<Casestatuses> Casestatuses { get; set; }
         public virtual DbSet<PgStatStatements> PgStatStatements { get; set; }
+        public virtual DbSet<Roles> Roles { get; set; }
         public virtual DbSet<Users> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -65,19 +66,18 @@ namespace consultant_data.Database
 
                 entity.Property(e => e.Appointmentid)
                     .HasColumnName("appointmentid")
-                    .HasMaxLength(40);
+                    .UseIdentityAlwaysColumn();
 
                 entity.Property(e => e.Appointmentdatetime)
                     .HasColumnName("appointmentdatetime")
                     .HasColumnType("timestamp with time zone");
 
                 entity.Property(e => e.Appointmenttitle)
+                    .IsRequired()
                     .HasColumnName("appointmenttitle")
                     .HasMaxLength(100);
 
-                entity.Property(e => e.Caseid)
-                    .HasColumnName("caseid")
-                    .HasMaxLength(40);
+                entity.Property(e => e.Caseid).HasColumnName("caseid");
 
                 entity.HasOne(d => d.Case)
                     .WithMany(p => p.Appointments)
@@ -87,29 +87,27 @@ namespace consultant_data.Database
 
             modelBuilder.Entity<Caseclient>(entity =>
             {
-                entity.HasKey(e => new { e.Caseid, e.Clientid })
+                entity.HasKey(e => e.Rowid)
                     .HasName("caseclient_pkey");
 
                 entity.ToTable("caseclient");
 
-                entity.Property(e => e.Caseid)
-                    .HasColumnName("caseid")
-                    .HasMaxLength(40);
+                entity.Property(e => e.Rowid)
+                    .HasColumnName("rowid")
+                    .UseIdentityAlwaysColumn();
 
-                entity.Property(e => e.Clientid)
-                    .HasColumnName("clientid")
-                    .HasMaxLength(40);
+                entity.Property(e => e.Caseid).HasColumnName("caseid");
+
+                entity.Property(e => e.Clientid).HasColumnName("clientid");
 
                 entity.HasOne(d => d.Case)
                     .WithMany(p => p.Caseclient)
                     .HasForeignKey(d => d.Caseid)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("caseclient_caseid_fkey");
 
                 entity.HasOne(d => d.Client)
                     .WithMany(p => p.Caseclient)
                     .HasForeignKey(d => d.Clientid)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("caseclient_clientid_fkey");
             });
 
@@ -122,11 +120,9 @@ namespace consultant_data.Database
 
                 entity.Property(e => e.Noteid)
                     .HasColumnName("noteid")
-                    .HasMaxLength(40);
+                    .UseIdentityAlwaysColumn();
 
-                entity.Property(e => e.Caseid)
-                    .HasColumnName("caseid")
-                    .HasMaxLength(40);
+                entity.Property(e => e.Caseid).HasColumnName("caseid");
 
                 entity.Property(e => e.Content)
                     .HasColumnName("content")
@@ -147,19 +143,15 @@ namespace consultant_data.Database
 
                 entity.Property(e => e.Caseid)
                     .HasColumnName("caseid")
-                    .HasMaxLength(40);
+                    .UseIdentityAlwaysColumn();
 
-                entity.Property(e => e.Activeconsultantid)
-                    .HasColumnName("activeconsultantid")
-                    .HasMaxLength(40);
+                entity.Property(e => e.Activeconsultantid).HasColumnName("activeconsultantid");
 
                 entity.Property(e => e.Casetitle)
                     .HasColumnName("casetitle")
                     .HasMaxLength(100);
 
-                entity.Property(e => e.Currentstatusid)
-                    .HasColumnName("currentstatusid")
-                    .HasMaxLength(40);
+                entity.Property(e => e.Currentstatusid).HasColumnName("currentstatusid");
 
                 entity.HasOne(d => d.Activeconsultant)
                     .WithMany(p => p.Cases)
@@ -181,9 +173,10 @@ namespace consultant_data.Database
 
                 entity.Property(e => e.Statusid)
                     .HasColumnName("statusid")
-                    .HasMaxLength(40);
+                    .UseIdentityAlwaysColumn();
 
                 entity.Property(e => e.Statustext)
+                    .IsRequired()
                     .HasColumnName("statustext")
                     .HasMaxLength(100);
             });
@@ -245,32 +238,46 @@ namespace consultant_data.Database
                     .HasColumnType("oid");
             });
 
+            modelBuilder.Entity<Roles>(entity =>
+            {
+                entity.HasKey(e => e.Roleid)
+                    .HasName("roles_pkey");
+
+                entity.ToTable("roles");
+
+                entity.Property(e => e.Roleid)
+                    .HasColumnName("roleid")
+                    .UseIdentityAlwaysColumn();
+
+                entity.Property(e => e.Roletext)
+                    .IsRequired()
+                    .HasColumnName("roletext")
+                    .HasMaxLength(100);
+            });
+
             modelBuilder.Entity<Users>(entity =>
             {
-                entity.HasKey(e => e.Userid)
+                entity.HasKey(e => e.Rowid)
                     .HasName("users_pkey");
 
                 entity.ToTable("users");
 
+                entity.Property(e => e.Rowid)
+                    .HasColumnName("rowid")
+                    .UseIdentityAlwaysColumn();
+
                 entity.Property(e => e.Userid)
+                    .IsRequired()
                     .HasColumnName("userid")
                     .HasMaxLength(40);
 
-                entity.Property(e => e.Email)
-                    .HasColumnName("email")
-                    .HasMaxLength(100);
+                entity.Property(e => e.Userrole).HasColumnName("userrole");
 
-                entity.Property(e => e.Firstname)
-                    .HasColumnName("firstname")
-                    .HasMaxLength(100);
-
-                entity.Property(e => e.Lastname)
-                    .HasColumnName("lastname")
-                    .HasMaxLength(100);
-
-                entity.Property(e => e.Middlename)
-                    .HasColumnName("middlename")
-                    .HasMaxLength(100);
+                entity.HasOne(d => d.UserroleNavigation)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.Userrole)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("users_userrole_fkey");
             });
 
             OnModelCreatingPartial(modelBuilder);

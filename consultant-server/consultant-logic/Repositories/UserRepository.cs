@@ -22,31 +22,31 @@ namespace consultant_logic.Repositories
             _context = context;
         }
 
-        public async Task<bool> AddUserAsync(User user, bool save = true)
+        public async Task<User> AddUserAsync(User user, bool save = true)
         {
             try
             {
-                _context.Users.Add(UserMapper.Map(user));
+                Users dbUser = _context.Users.Add(UserMapper.Map(user)).Entity;
 
                 if (save)
                     await _context.SaveChangesAsync();
 
-                return true;
+                return UserMapper.Map(dbUser);
             }
             catch (Exception e)
             {
-                return false;
+                return null;
             }
         }
 
-        public async Task<User> GetUserByIdAsync(Guid userId)
+        public async Task<User> GetUserByIdAsync(string userId)
         {
             try
             {
                 Users dbUser = await _context.Users
                     .Include(u => u.Cases).ThenInclude(c => c.Appointments)
                     .Include(u => u.Cases).ThenInclude(c => c.Casenotes)
-                    .FirstOrDefaultAsync(u => u.Userid == userId.ToString());
+                    .FirstOrDefaultAsync(u => u.Userid == userId);
 
                 if (dbUser == null)
                     return null;
@@ -59,21 +59,23 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<List<User>> SearchUsersByNameAsync(string firstName, string middleName, string lastName)
+        public async Task<User> GetUserByRowIdAsync(int rowId)
         {
             try
             {
-                return _context.Users
-                    .Include(u => u.Cases)
-                    .Where(c => (c.Firstname == firstName || firstName == "")
-                        && (c.Middlename == middleName || middleName == "")
-                        && (c.Lastname == lastName || lastName == ""))
-                    .Select(UserMapper.Map)
-                    .ToList();
+                Users dbUser = await _context.Users
+                    .Include(u => u.Cases).ThenInclude(c => c.Appointments)
+                    .Include(u => u.Cases).ThenInclude(c => c.Casenotes)
+                    .FirstOrDefaultAsync(u => u.Rowid == rowId);
+
+                if (dbUser == null)
+                    return null;
+
+                return UserMapper.Map(dbUser);
             }
             catch (Exception e)
             {
-                return new List<User>();
+                return null;
             }
         }
 
@@ -98,21 +100,21 @@ namespace consultant_logic.Repositories
             }
         } */
 
-        public async Task<bool> UpdateUserAsync(User user, bool save = true)
+        public async Task<User> UpdateUserAsync(User user, bool save = true)
         {
             try
             {
                 // Update the User
-                _context.Users.Update(await _context.Users.FirstOrDefaultAsync(c => c.Userid == user.Id.ToString()));
+                Users dbUser = _context.Users.Update(await _context.Users.FirstOrDefaultAsync(c => c.Rowid == user.Id)).Entity;
 
                 if (save)
                     await _context.SaveChangesAsync();
 
-                return true;
+                return UserMapper.Map(dbUser);
             }
             catch (Exception e)
             {
-                return false;
+                return null;
             }
         }
 
@@ -124,13 +126,13 @@ namespace consultant_logic.Repositories
                 foreach (Case c in user.Cases)
                 {
                     // Select the caseclient with the user's id and the case id pertaining to this case
-                    Caseclient cc = await _context.Caseclient.FirstOrDefaultAsync(cc => cc.Clientid == user.Id.ToString() && cc.Caseid == c.Id.ToString());
+                    Caseclient cc = await _context.Caseclient.FirstOrDefaultAsync(cc => cc.Clientid == user.Id && cc.Caseid == c.Id);
                     if (cc != null)
                         _context.Caseclient.Remove(cc);
                 }
 
                 // Finally, remove the user
-                _context.Users.Remove(await _context.Users.FirstOrDefaultAsync(c => c.Userid == user.Id.ToString()));
+                _context.Users.Remove(await _context.Users.FirstOrDefaultAsync(c => c.Rowid == user.Id));
 
                 if (save)
                     await _context.SaveChangesAsync();

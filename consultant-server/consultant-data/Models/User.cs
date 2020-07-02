@@ -6,11 +6,10 @@ namespace consultant_data.Models
 {
     public class User
     {
-        public Guid Id { get; set; }
-        public string FirstName { get; set; }
-        public string MiddleName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
+        public int Id { get; set; }
+        public string UserId { get; set; }
+        public Role Role { get; set; }
+
         public List<Case> Cases { get; set; } = new List<Case>();
     }
 }

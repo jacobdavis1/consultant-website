@@ -7,6 +7,7 @@ export const environment = {
 
   auth0_domain: "",
   auth0_clientId: "",
+  auth0_consultant_api_audience: "",
   auth0_managementAudience: "",
   auth0_managementToken: "",
 

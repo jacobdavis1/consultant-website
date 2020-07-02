@@ -13,10 +13,10 @@ namespace consultant_data.Mappers
         {
             return new Case
             {
-                Id = Guid.Parse(targetCase.Caseid),
+                Id = targetCase.Caseid,
                 Title = targetCase.Casetitle,
                 Status = CaseStatusMapper.Map(targetCase.Currentstatus),
-                UpcomingAppointments = targetCase.Appointments.Select(AppointmentMapper.Map).ToList(),
+                Appointments = targetCase.Appointments.Select(AppointmentMapper.Map).ToList(),
                 Notes = targetCase.Casenotes.Select(CaseNoteMapper.Map).ToList()
             };
         }
@@ -25,10 +25,10 @@ namespace consultant_data.Mappers
         {
             return new Database.Cases
             {
-                Caseid = targetCase.Id.ToString(),
+                Caseid = targetCase.Id,
                 Casetitle = targetCase.Title,
-                Activeconsultantid = targetCase.ActiveConsultant.Id.ToString(),
-                Currentstatusid = targetCase.Status.Id.ToString()
+                Activeconsultantid = targetCase.ActiveConsultant.Id,
+                Currentstatusid = targetCase.Status.Id
             };
         }
     }

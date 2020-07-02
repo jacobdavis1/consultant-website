@@ -4,10 +4,10 @@ using System.Text;
 
 namespace consultant_data.Models
 {
-    public class CaseNote
+    public class Note
     {
-        public Guid Id { get; set; }
-        public Guid CaseId { get; set; }
+        public int Id { get; set; }
+        public int CaseId { get; set; }
 
         public string Content { get; set; }
     }

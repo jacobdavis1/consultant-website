@@ -12,10 +12,10 @@ namespace consultant_data.Mappers
         {
             return new Appointment
             {
-                Id = Guid.Parse(appointment.Appointmentid),
-                CaseId = Guid.Parse(appointment.Caseid),
+                Id = appointment.Appointmentid,
+                CaseId = appointment.Caseid ?? -1,
                 Title = appointment.Appointmenttitle,
-                AppointmentDateTime = appointment.Appointmentdatetime.GetValueOrDefault()
+                AppointmentDateTime = appointment.Appointmentdatetime
             };
         }
 
@@ -23,8 +23,8 @@ namespace consultant_data.Mappers
         {
             return new Database.Appointments
             {
-                Appointmentid = appointment.Id.ToString(),
-                Caseid = appointment.CaseId.ToString(),
+                Appointmentid = appointment.Id,
+                Caseid = appointment.CaseId,
                 Appointmenttitle = appointment.Title,
                 Appointmentdatetime = appointment.AppointmentDateTime
             };

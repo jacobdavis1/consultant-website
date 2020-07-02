@@ -21,25 +21,16 @@ namespace consultant_logic.Repositories
             _context = context;
         }
 
-        public async Task<bool> AddCaseStatusAsync(CaseStatus caseStatus)
+        public async Task<Status> AddCaseStatusAsync(Status caseStatus, bool save = true)
         {
             try
             {
-                _context.Casestatuses.Add(CaseStatusMapper.Map(caseStatus));
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-        }
+                Casestatuses dbStatus = _context.Casestatuses.Add(CaseStatusMapper.Map(caseStatus)).Entity;
 
-        public async Task<CaseStatus> GetCaseStatusByIdAsync(Guid statusId)
-        {
-            try
-            {
-                return CaseStatusMapper.Map(await _context.Casestatuses.FindAsync(statusId.ToString()));
+                if (save)
+                    await _context.SaveChangesAsync();
+
+                return CaseStatusMapper.Map(dbStatus);
             }
             catch (Exception e)
             {
@@ -47,7 +38,19 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<CaseStatus> GetCaseStatusByTextAsync(string text)
+        public async Task<Status> GetCaseStatusByIdAsync(int statusId)
+        {
+            try
+            {
+                return CaseStatusMapper.Map(await _context.Casestatuses.FindAsync(statusId));
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        public async Task<Status> GetCaseStatusByTextAsync(string text)
         {
             try
             {
@@ -59,26 +62,32 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<bool> UpdateCaseStatusAsync(CaseStatus caseStatus)
+        public async Task<Status> UpdateCaseStatusAsync(Status caseStatus, bool save = true)
         {
             try
             {
-                _context.Casestatuses.Update(_context.Casestatuses.FirstOrDefault(C => C.Statusid == caseStatus.Id.ToString()));
-                await _context.SaveChangesAsync();
-                return true;
+                Casestatuses dbStatus =_context.Casestatuses.Update(_context.Casestatuses.FirstOrDefault(C => C.Statusid == caseStatus.Id)).Entity;
+
+                if (save)
+                    await _context.SaveChangesAsync();
+
+                return CaseStatusMapper.Map(dbStatus);
             }
             catch (Exception e)
             {
-                return false;
+                return null;
             }
         }
 
-        public async Task<bool> DeleteCaseStatusAsync(CaseStatus caseStatus)
+        public async Task<bool> DeleteCaseStatusAsync(Status caseStatus, bool save = true)
         {
             try
             {
-                _context.Casestatuses.Remove(_context.Casestatuses.FirstOrDefault(C => C.Statusid == caseStatus.Id.ToString()));
-                await _context.SaveChangesAsync();
+                _context.Casestatuses.Remove(_context.Casestatuses.FirstOrDefault(C => C.Statusid == caseStatus.Id));
+
+                if (save)
+                    await _context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception e)

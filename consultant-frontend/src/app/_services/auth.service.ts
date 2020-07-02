@@ -14,7 +14,7 @@ export class AuthService {
   auth0Client$ = (from(
     createAuth0Client({
       domain: environment.auth0_domain,
-      audience: environment.auth0_managementAudience,
+      audience: environment.auth0_consultant_api_audience,
       client_id: environment.auth0_clientId,
       redirect_uri: `${window.location.origin}`
     })
@@ -93,7 +93,7 @@ export class AuthService {
     this.auth0Client$.subscribe((client: Auth0Client) => {
       // Call method to log in
       client.loginWithRedirect({
-        redirect_uri: `${window.location.origin}/consultant-frontend`,
+        redirect_uri: `${window.location.origin}`,
         appState: { target: redirectPath }
       });
     });
@@ -133,7 +133,7 @@ export class AuthService {
       // Call method to log out
       client.logout({
         client_id: environment.auth0_clientId,
-        returnTo: `${window.location.origin}/consultant-frontend`
+        returnTo: `${window.location.origin}`
       });
     });
   }

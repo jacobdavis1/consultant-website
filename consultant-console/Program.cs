@@ -17,54 +17,55 @@ namespace ConsoleRunner
             khbatlzvContext context = new khbatlzvContext();
 
             IUserRepository userRepository = new UserRepository(context);
-            ICaseRepository caseRepository = new CaseRepository(context);
+            IAppointmentRepository appointmentRepository = new AppointmentRepository(context);
+            INoteRepository noteRepository = new NoteRepository(context);
+            ICaseRepository caseRepository = new CaseRepository(context, appointmentRepository, noteRepository);
             ICaseStatusRepository caseStatusRepository = new CaseStatusRepository(context);
+            IRoleRepository roleRepository = new RoleRepository(context);
 
             Console.WriteLine("Time to run some live tests!");
             Console.WriteLine();
             Console.WriteLine();
 
-            await RunUserTests(userRepository);
-            await RunUserWithCasesTest(userRepository, caseRepository, caseStatusRepository);
-            await RunCaseWithAppointmentsTest(userRepository, caseRepository, caseStatusRepository);
-            await RunCaseWithNotesTest(userRepository, caseRepository, caseStatusRepository);
+            await RunUserTests(userRepository, roleRepository);
+            await RunUserWithCasesTest(userRepository, caseRepository, caseStatusRepository, roleRepository);
+            await RunCaseWithAppointmentsTest(userRepository, caseRepository, caseStatusRepository, appointmentRepository, roleRepository);
+            await RunCaseWithNotesTest(userRepository, caseRepository, caseStatusRepository, noteRepository, roleRepository);
         }
 
-        static async Task RunUserTests(IUserRepository _user)
+        static async Task RunUserTests(IUserRepository _user, IRoleRepository _role)
         {
             Console.WriteLine("Beginning user tests...");
-            
+
+            Role roleClient = await _role.GetRoleByText("Client");
 
             User user = new User
             {
-                Id = Guid.NewGuid(),
-                FirstName = "Jacob",
-                MiddleName = "Marl",
-                LastName = "Javis",
-                Email = "jacob@website.com"
+                UserId = "testUser",
+                Role = roleClient
             };
 
             Console.WriteLine("Adding user...");
-            await _user.AddUserAsync(user);
+            user = await _user.AddUserAsync(user);
 
             Console.WriteLine("Added user with id " + user.Id.ToString() + ". User set to null.");
-            String userId = user.Id.ToString();
+            int userRowId = user.Id;
             user = null;
 
-            user = await _user.GetUserByIdAsync(Guid.Parse(userId));
-            Console.WriteLine("Checking get: user name: " + user.FirstName + " " + user.MiddleName + " " + user.LastName + " ");
+            user = await _user.GetUserByRowIdAsync(userRowId);
+            Console.WriteLine("Checking get: user name: " + user.UserId);
             Console.WriteLine("Changing name...");
 
-            user.FirstName = "TestName";
+            user.UserId = "UpdatedId";
             await _user.UpdateUserAsync(user);
-            Console.WriteLine("User name: " + user.FirstName + " " + user.MiddleName + " " + user.LastName + " ");
+            Console.WriteLine("User name: " + user.UserId);
 
             Console.WriteLine("Deleting added user.");
 
             await _user.DeleteUserAsync(user);
 
             user = null;
-            user = await _user.GetUserByIdAsync(Guid.Parse(userId));
+            user = await _user.GetUserByRowIdAsync(userRowId);
 
             Console.WriteLine("Deletion: " + ((user == null) ? "Success" : "Failure"));
             Console.WriteLine("TEST END");
@@ -72,54 +73,39 @@ namespace ConsoleRunner
             Console.WriteLine();
         }
 
-        static async Task RunUserWithCasesTest(IUserRepository _user, ICaseRepository _case, ICaseStatusRepository _caseStatus)
+        static async Task RunUserWithCasesTest(IUserRepository _user, ICaseRepository _case, ICaseStatusRepository _caseStatus, IRoleRepository _role)
         {
             Console.WriteLine("TEST BEGIN.");
             Console.WriteLine("Beginning user with cases test...");
 
-            // Check that the "New" status exists, and if it doesnt, create it
-            CaseStatus statusNew = await _caseStatus.GetCaseStatusByTextAsync("New");
-            if (statusNew == null)
-            {
-                statusNew = new CaseStatus
-                {
-                    Id = Guid.NewGuid(),
-                    Text = "New"
-                };
-                await _caseStatus.AddCaseStatusAsync(statusNew);
-            }
+            Status unassigned = await _caseStatus.GetCaseStatusByTextAsync("Unassigned");
+            Role roleClient = await _role.GetRoleByText("Client");
+            Role roleConsultant = await _role.GetRoleByText("Consultant");
                 
             User consultant = new User
             {
-                Id = Guid.NewGuid(),
-                FirstName = "Consultant",
-                MiddleName = "Del",
-                LastName = "Sol",
-                Email = "consultant@website.com"
+                UserId = "testid_consultant",
+                Role = roleConsultant
             };
-            await _user.AddUserAsync(consultant);
+            consultant = await _user.AddUserAsync(consultant);
 
             User client = new User
             {
-                Id = Guid.NewGuid(),
-                FirstName = "Charles",
-                MiddleName = "Dingo",
-                LastName = "Jones",
-                Email = "charlesdingo@website.com"
+                UserId = "testid_client",
+                Role = roleClient
             };
-            await _user.AddUserAsync(client);
+            client = await _user.AddUserAsync(client);
 
             Case aCase = new Case
             {
-                Id = Guid.NewGuid(),
                 Title = "Test Case",
                 ActiveConsultant = consultant,
                 Clients = new List<User> { client },
-                Status = statusNew,
+                Status = unassigned,
             };
-            await _case.AddCaseAsync(aCase);
+            aCase = await _case.AddCaseAsync(aCase);
 
-            client = await _user.GetUserByIdAsync(client.Id);
+            client = await _user.GetUserByRowIdAsync(client.Id);
             Console.WriteLine("Cases: ");
             for (int i = 0; i < client.Cases.Count; ++i)
             {
@@ -130,9 +116,9 @@ namespace ConsoleRunner
             await _case.DeleteCaseAsync(aCase);
             await _user.DeleteUserAsync(consultant);
 
-            client = await _user.GetUserByIdAsync(client.Id);
+            client = await _user.GetUserByIdAsync(client.UserId);
             aCase = await _case.GetCaseByIdAsync(aCase.Id);
-            consultant = await _user.GetUserByIdAsync(consultant.Id);
+            consultant = await _user.GetUserByIdAsync(consultant.UserId);
 
             Console.WriteLine("Deletion: " + ((client == null && aCase == null && consultant == null) ? "Success" : "Failure"));
             Console.WriteLine("TEST END.");
@@ -140,68 +126,51 @@ namespace ConsoleRunner
             Console.WriteLine();
         }
 
-        static async Task RunCaseWithAppointmentsTest(IUserRepository _user, ICaseRepository _case, ICaseStatusRepository _caseStatus)
+        static async Task RunCaseWithAppointmentsTest(IUserRepository _user, ICaseRepository _case, 
+            ICaseStatusRepository _caseStatus, IAppointmentRepository _appointment, IRoleRepository _role)
         {
             Console.WriteLine("TEST BEGIN");
             Console.WriteLine("Beginning appointment test...");
 
-            // Check that the "New" status exists, and if it doesnt, create it
-            CaseStatus statusNew = await _caseStatus.GetCaseStatusByTextAsync("New");
-            if (statusNew == null)
-            {
-                statusNew = new CaseStatus
-                {
-                    Id = Guid.NewGuid(),
-                    Text = "New"
-                };
-                await _caseStatus.AddCaseStatusAsync(statusNew);
-            }
+            Status unassigned = await _caseStatus.GetCaseStatusByTextAsync("Unassigned");
+            Role roleClient = await _role.GetRoleByText("Client");
+            Role roleConsultant = await _role.GetRoleByText("Consultant");
 
             // SETUP
-            Console.WriteLine("Setting up test data...");
             User consultant = new User
             {
-                Id = Guid.NewGuid(),
-                FirstName = "Consultant",
-                MiddleName = "Del",
-                LastName = "Sol",
-                Email = "consultant@website.com"
+                UserId = "testid_consultant",
+                Role = roleConsultant
             };
-            await _user.AddUserAsync(consultant);
+            consultant = await _user.AddUserAsync(consultant);
 
             User client = new User
             {
-                Id = Guid.NewGuid(),
-                FirstName = "Charles",
-                MiddleName = "Dingo",
-                LastName = "Jones",
-                Email = "charlesdingo@website.com"
+                UserId = "testid_client",
+                Role = roleClient
             };
-            await _user.AddUserAsync(client);
+            client = await _user.AddUserAsync(client);
 
             Case aCase = new Case
             {
-                Id = Guid.NewGuid(),
                 Title = "Test Case",
                 ActiveConsultant = consultant,
                 Clients = new List<User> { client },
-                Status = statusNew
+                Status = unassigned
             };
-            await _case.AddCaseAsync(aCase);
+            aCase = await _case.AddCaseAsync(aCase);
 
             // CREATE appointments for case
             Console.WriteLine("Creating appointments...");
-            await _case.AddAppointmentToCaseAsync(aCase, new Appointment
+            await _appointment.AddAppointmentToCaseAsync(aCase, new Appointment
             {
-                Id = Guid.NewGuid(),
                 CaseId = aCase.Id,
                 AppointmentDateTime = DateTime.Now,
                 Title = "Test Appointment 1"
             });
 
-            await _case.AddAppointmentToCaseAsync(aCase, new Appointment
+            await _appointment.AddAppointmentToCaseAsync(aCase, new Appointment
             {
-                Id = Guid.NewGuid(),
                 CaseId = aCase.Id,
                 AppointmentDateTime = DateTime.Today,
                 Title = "Test Appointment 2"
@@ -209,10 +178,10 @@ namespace ConsoleRunner
 
             // RETRIEVE case via client
             Console.WriteLine("Retrieving data...");
-            client = await _user.GetUserByIdAsync(client.Id);
+            client = await _user.GetUserByRowIdAsync(client.Id);
             foreach (Case c in client.Cases)
             {
-                foreach (Appointment a in c.UpcomingAppointments)
+                foreach (Appointment a in c.Appointments)
                 {
                     Console.WriteLine("Appointment for " + c.Title + ": " + a.AppointmentDateTime);
                 }
@@ -220,19 +189,19 @@ namespace ConsoleRunner
 
             // UPDATE first appointment to be for tomorrow
             Console.WriteLine("Updating an appointment...");
-            client.Cases[0].UpcomingAppointments[0].AppointmentDateTime = client.Cases[0].UpcomingAppointments[0].AppointmentDateTime.AddDays(1);
-            await _case.UpdateAppointmentAsync(client.Cases[0].UpcomingAppointments[0]);
+            client.Cases[0].Appointments[0].AppointmentDateTime = client.Cases[0].Appointments[0].AppointmentDateTime.AddDays(1);
+            await _appointment.UpdateAppointmentAsync(client.Cases[0].Appointments[0]);
 
             // DELETE appointment
             Console.WriteLine("Deleting an appointment...");
-            await _case.DeleteAppointmentFromCaseAsync(client.Cases[0], client.Cases[0].UpcomingAppointments[1]);
+            await _appointment.DeleteAppointmentFromCaseAsync(client.Cases[0], client.Cases[0].Appointments[1]);
 
             // RETRIEVE case via client a second time to see update
             Console.WriteLine("Retrieving data again...");
-            client = await _user.GetUserByIdAsync(client.Id);
+            client = await _user.GetUserByIdAsync(client.UserId);
             foreach (Case c in client.Cases)
             {
-                foreach (Appointment a in c.UpcomingAppointments)
+                foreach (Appointment a in c.Appointments)
                 {
                     Console.WriteLine("Appointment for " + c.Title + ": " + a.AppointmentDateTime);
                 }
@@ -244,9 +213,9 @@ namespace ConsoleRunner
             await _case.DeleteCaseAsync(aCase);
             await _user.DeleteUserAsync(consultant);
 
-            client = await _user.GetUserByIdAsync(client.Id);
+            client = await _user.GetUserByIdAsync(client.UserId);
             aCase = await _case.GetCaseByIdAsync(aCase.Id);
-            consultant = await _user.GetUserByIdAsync(consultant.Id);
+            consultant = await _user.GetUserByIdAsync(consultant.UserId);
 
             Console.WriteLine("Deletion: " + ((client == null && aCase == null && consultant == null) ? "Success" : "Failure"));
             Console.WriteLine("TEST END.");
@@ -254,76 +223,61 @@ namespace ConsoleRunner
             Console.WriteLine();
         }
 
-        static async Task RunCaseWithNotesTest(IUserRepository _user, ICaseRepository _case, ICaseStatusRepository _caseStatus)
+        static async Task RunCaseWithNotesTest(IUserRepository _user, ICaseRepository _case, 
+            ICaseStatusRepository _caseStatus, INoteRepository _note, IRoleRepository _role)
         {
             Console.WriteLine("TEST BEGIN.");
             Console.WriteLine("Beginning note test...");
 
             // SET UP
             Console.WriteLine("Setting up test data...");
-            // Check that the "New" status exists, and if it doesnt, create it
-            CaseStatus statusNew = await _caseStatus.GetCaseStatusByTextAsync("New");
-            if (statusNew == null)
-            {
-                statusNew = new CaseStatus
-                {
-                    Id = Guid.NewGuid(),
-                    Text = "New"
-                };
-                await _caseStatus.AddCaseStatusAsync(statusNew);
-            }
+            Status unassigned = await _caseStatus.GetCaseStatusByTextAsync("Unassigned");
+            Role roleClient = await _role.GetRoleByText("Client");
+            Role roleConsultant = await _role.GetRoleByText("Consultant");
 
+            // SETUP
             User consultant = new User
             {
-                Id = Guid.NewGuid(),
-                FirstName = "Consultant",
-                MiddleName = "Del",
-                LastName = "Sol",
-                Email = "consultant@website.com"
+                UserId = "testid_consultant",
+                Role = roleConsultant
             };
-            await _user.AddUserAsync(consultant);
+            consultant = await _user.AddUserAsync(consultant);
 
             User client = new User
             {
-                Id = Guid.NewGuid(),
-                FirstName = "Charles",
-                MiddleName = "Dingo",
-                LastName = "Jones",
-                Email = "charlesdingo@website.com"
+                UserId = "testid_client",
+                Role = roleClient
             };
-            await _user.AddUserAsync(client);
+            client = await _user.AddUserAsync(client);
 
             Case aCase = new Case
             {
-                Id = Guid.NewGuid(),
                 Title = "Test Case",
                 ActiveConsultant = consultant,
                 Clients = new List<User> { client },
-                Status = statusNew
+                Status = unassigned
             };
-            await _case.AddCaseAsync(aCase);
+            aCase = await _case.AddCaseAsync(aCase);
 
             // CREATE new notes and add them to the case
             Console.WriteLine("Creating notes...");
-            await _case.AddNoteToCaseAsync(aCase, new CaseNote
+            await _note.AddNoteToCaseAsync(aCase, new Note
             {
-                Id = Guid.NewGuid(),
                 CaseId = aCase.Id,
                 Content = "This case is a test case, and this is a test note."
             });
-            await _case.AddNoteToCaseAsync(aCase, new CaseNote
+            await _note.AddNoteToCaseAsync(aCase, new Note
             {
-                Id = Guid.NewGuid(),
                 CaseId = aCase.Id,
                 Content = "Another test note."
             });
 
             // RETRIEVE the user with the case to get the client
             Console.WriteLine("Retrieving notes...");
-            client = await _user.GetUserByIdAsync(client.Id);
+            client = await _user.GetUserByRowIdAsync(client.Id);
             foreach (Case c in client.Cases)
             {
-                foreach (CaseNote cn in c.Notes)
+                foreach (Note cn in c.Notes)
                 {
                     Console.WriteLine("Note: " + cn.Content);
                 }
@@ -331,20 +285,20 @@ namespace ConsoleRunner
 
             // UPDATE a note
             Console.WriteLine("Updating a note...");
-            CaseNote note = client.Cases[0].Notes[0];
+            Note note = client.Cases[0].Notes[0];
             note.Content = "Updated content.";
-            await _case.UpdateNoteAsync(note);
+            await _note.UpdateNoteAsync(note);
 
             // DELETE a note
             Console.WriteLine("Deleting  note...");
-            await _case.DeleteNoteFromCaseAsync(client.Cases[0], client.Cases[0].Notes[1]);
+            await _note.DeleteNoteFromCaseAsync(client.Cases[0], client.Cases[0].Notes[1]);
 
             // RETRIEVE again to see the changes
             Console.WriteLine("Retrieving notes again...");
-            client = await _user.GetUserByIdAsync(client.Id);
+            client = await _user.GetUserByRowIdAsync(client.Id);
             foreach (Case c in client.Cases)
             {
-                foreach (CaseNote cn in c.Notes)
+                foreach (Note cn in c.Notes)
                 {
                     Console.WriteLine("Note: " + cn.Content);
                 }
@@ -356,8 +310,8 @@ namespace ConsoleRunner
             await _case.DeleteCaseAsync(aCase);
             await _user.DeleteUserAsync(consultant);
 
-            consultant = await _user.GetUserByIdAsync(consultant.Id);
-            client = await _user.GetUserByIdAsync(client.Id);
+            consultant = await _user.GetUserByIdAsync(consultant.UserId);
+            client = await _user.GetUserByIdAsync(client.UserId);
             aCase = await _case.GetCaseByIdAsync(aCase.Id);
 
             Console.WriteLine("Deletion: " + ((consultant == null && client == null && aCase == null) ? "Success" : "Failure"));
