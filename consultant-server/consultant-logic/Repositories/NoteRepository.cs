@@ -20,13 +20,13 @@ namespace consultant_logic.Repositories
             _context = context;
         }
 
-        public async Task<Note> AddNoteToCaseAsync(Case targetCase, Note note, bool save = true)
+        public async Task<bool> AddNoteToCaseAsync(Case targetCase, Note note, bool save = true)
         {
             try
             {
                 // First, add the note
                 note.CaseId = targetCase.Id;
-                Casenotes dbNote = _context.Casenotes.Add(CaseNoteMapper.Map(note)).Entity;
+                _context.Casenotes.Add(CaseNoteMapper.Map(note));
 
                 // Finally, update the case model and db
                 targetCase.Notes.Add(note);
@@ -34,11 +34,11 @@ namespace consultant_logic.Repositories
                 if (save)
                     await _context.SaveChangesAsync();
 
-                return CaseNoteMapper.Map(dbNote);
+                return true;
             }
             catch (Exception e)
             {
-                return null;
+                return false;
             }
         }
 
@@ -73,23 +73,23 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<Note> UpdateNoteAsync(Note note, bool save = true)
+        public async Task<bool> UpdateNoteAsync(Note note, bool save = true)
         {
             try
             {
                 Casenotes dbNote = await _context.Casenotes.FirstOrDefaultAsync(n => n.Noteid == note.Id);
                 dbNote.Content = note.Content;
 
-                dbNote = _context.Casenotes.Update(dbNote).Entity;
+                _context.Casenotes.Update(dbNote);
 
                 if (save)
                     await _context.SaveChangesAsync();
 
-                return CaseNoteMapper.Map(dbNote);
+                return true;
             }
             catch (Exception e)
             {
-                return null;
+                return false;
             }
         }
 

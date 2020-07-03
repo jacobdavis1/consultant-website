@@ -49,14 +49,15 @@ namespace consultant_server.Controllers
                         Role = Role.Client
                     };
 
-                    user = await _user.AddUserAsync(user);
+                    await _user.AddUserAsync(user);
+                    user = await _user.GetUserByIdAsync(userId);
                 }
 
                 return user;
             }
             catch (Exception e)
             {
-                return BadRequest();
+                return BadRequest(e);
             }
         }
     }

@@ -21,20 +21,20 @@ namespace consultant_logic.Repositories
             _context = context;
         }
 
-        public async Task<Status> AddCaseStatusAsync(Status caseStatus, bool save = true)
+        public async Task<bool> AddCaseStatusAsync(Status caseStatus, bool save = true)
         {
             try
             {
-                Casestatuses dbStatus = _context.Casestatuses.Add(CaseStatusMapper.Map(caseStatus)).Entity;
+                _context.Casestatuses.Add(CaseStatusMapper.Map(caseStatus));
 
                 if (save)
                     await _context.SaveChangesAsync();
 
-                return CaseStatusMapper.Map(dbStatus);
+                return true;
             }
             catch (Exception e)
             {
-                return null;
+                return false;
             }
         }
 
@@ -62,20 +62,20 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<Status> UpdateCaseStatusAsync(Status caseStatus, bool save = true)
+        public async Task<bool> UpdateCaseStatusAsync(Status caseStatus, bool save = true)
         {
             try
             {
-                Casestatuses dbStatus =_context.Casestatuses.Update(_context.Casestatuses.FirstOrDefault(C => C.Statusid == caseStatus.Id)).Entity;
+                _context.Casestatuses.Update(_context.Casestatuses.FirstOrDefault(C => C.Statusid == caseStatus.Id));
 
                 if (save)
                     await _context.SaveChangesAsync();
 
-                return CaseStatusMapper.Map(dbStatus);
+                return true;
             }
             catch (Exception e)
             {
-                return null;
+                return false;
             }
         }
 

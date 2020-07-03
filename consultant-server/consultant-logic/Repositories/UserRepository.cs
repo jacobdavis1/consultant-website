@@ -22,21 +22,20 @@ namespace consultant_logic.Repositories
             _context = context;
         }
 
-        public async Task<User> AddUserAsync(User user, bool save = true)
+        public async Task<bool> AddUserAsync(User user, bool save = true)
         {
             try
             {
                 Users dbUser = _context.Users.Add(UserMapper.Map(user)).Entity;
-                _context.Entry(dbUser).Reference(u => u.UserroleNavigation).Load();
 
                 if (save)
                     await _context.SaveChangesAsync();
 
-                return UserMapper.Map(dbUser);
+                return true;
             }
             catch (Exception e)
             {
-                return null;
+                return false;
             }
         }
 
@@ -107,21 +106,25 @@ namespace consultant_logic.Repositories
             }
         } */
 
-        public async Task<User> UpdateUserAsync(User user, bool save = true)
+        public async Task<bool> UpdateUserAsync(User user, bool save = true)
         {
             try
             {
                 // Update the User
-                Users dbUser = _context.Users.Update(await _context.Users.FirstOrDefaultAsync(c => c.Rowid == user.Id)).Entity;
+                Users dbUser = await _context.Users.FirstOrDefaultAsync(c => c.Rowid == user.Id);
+                dbUser.Userid = user.UserId;
+                dbUser.Userrole = user.Role.Id;
+
+                _context.Users.Update(dbUser);
 
                 if (save)
                     await _context.SaveChangesAsync();
 
-                return UserMapper.Map(dbUser);
+                return true;
             }
             catch (Exception e)
             {
-                return null;
+                return false;
             }
         }
 

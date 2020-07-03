@@ -9,7 +9,7 @@ namespace consultant_data.RepositoryInterfaces
 {
     public interface IUserRepository
     {
-        Task<User> AddUserAsync(User user, bool save = true);
+        Task<bool> AddUserAsync(User user, bool save = true);
 
         Task<User> GetUserByIdAsync(string userId);
 
@@ -17,7 +17,7 @@ namespace consultant_data.RepositoryInterfaces
 
         Task<List<User>> GetAllUsersByCaseAsync(Case targetCase);
 
-        Task<User> UpdateUserAsync(User user, bool save = true);
+        Task<bool> UpdateUserAsync(User user, bool save = true);
 
         Task<bool> DeleteUserAsync(User user, bool save = true);
     }

@@ -9,13 +9,13 @@ namespace consultant_data.RepositoryInterfaces
 {
     public interface ICaseStatusRepository
     {
-        Task<Status> AddCaseStatusAsync(Status caseStatus, bool save = true);
+        Task<bool> AddCaseStatusAsync(Status caseStatus, bool save = true);
 
         Task<Status> GetCaseStatusByIdAsync(int statusId);
 
         Task<Status> GetCaseStatusByTextAsync(string text);
 
-        Task<Status> UpdateCaseStatusAsync(Status caseStatus, bool save = true);
+        Task<bool> UpdateCaseStatusAsync(Status caseStatus, bool save = true);
 
         Task<bool> DeleteCaseStatusAsync(Status caseStatus, bool save = true);
     }

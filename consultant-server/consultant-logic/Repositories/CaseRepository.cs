@@ -29,15 +29,13 @@ namespace consultant_logic.Repositories
 
         // NOTE: AddCaseAsync isnt able to delay saving due to needing to query the db in order to get the id,
         //  which is accomplished by saving
-        public async Task<Case> AddCaseAsync(Case targetCase, bool save = true)
+        public async Task<bool> AddCaseAsync(Case targetCase, bool save = true)
         {
             try
             {
                 // Add the case
                 Cases dbCase = _context.Cases.Add(CaseMapper.Map(targetCase)).Entity;
                 await _context.SaveChangesAsync();
-                _context.Entry(dbCase).Reference(c => c.Currentstatus).Load();
-                _context.Entry(dbCase).Reference(c => c.Activeconsultant).Load();
 
                 // Next, add the caseclient entry for every client
                 foreach (User user in targetCase.Clients)
@@ -48,9 +46,8 @@ namespace consultant_logic.Repositories
                         Clientid = user.Id
                     }).Entity;
 
-                    User u = await _user.GetUserByRowIdAsync(user.Id);
-                    u.Cases.Add(targetCase);
-                    await _user.UpdateUserAsync(u, false);
+                    user.Cases.Add(targetCase);
+                    await _user.UpdateUserAsync(user, false);
 
                     dbCase.Caseclient.Add(dbCaseclient);
                 }
@@ -70,11 +67,11 @@ namespace consultant_logic.Repositories
                 if (save)
                     await _context.SaveChangesAsync();
 
-                return CaseMapper.Map(dbCase);
+                return true;
             }
             catch (Exception e)
             {
-                return null;
+                return false;
             }
         }
 
@@ -148,7 +145,7 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<Case> UpdateCaseAsync(Case targetCase, bool save = true)
+        public async Task<bool> UpdateCaseAsync(Case targetCase, bool save = true)
         {
             try
             {
@@ -167,17 +164,16 @@ namespace consultant_logic.Repositories
                 dbCase.Currentstatusid = targetCase.Status.Id;
                 dbCase.Casetitle = targetCase.Title;
 
-                dbCase = _context.Cases.Update(dbCase).Entity;
-                _context.Entry(dbCase).Reference(c => c.Currentstatus).Load();
+                _context.Cases.Update(dbCase);
 
                 if (save)
                     await _context.SaveChangesAsync();
                 
-                return CaseMapper.Map(dbCase);
+                return true;
             }
             catch (Exception e)
             {
-                return null;
+                return false;
             }
         }
 

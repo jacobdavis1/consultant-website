@@ -19,20 +19,20 @@ namespace consultant_logic.Repositories
             _context = context;
         }
 
-        public async Task<Role> AddRole(Role role, bool save = true)
+        public async Task<bool> AddRole(Role role, bool save = true)
         {
             try
             {
-                Roles dbRole = _context.Roles.Add(RoleMapper.Map(role)).Entity;
+                _context.Roles.Add(RoleMapper.Map(role));
 
                 if (save)
                     await _context.SaveChangesAsync();
 
-                return RoleMapper.Map(dbRole);
+                return true;
             }
             catch (Exception e)
             {
-                return null;
+                return false;
             }
         }
 
@@ -88,21 +88,23 @@ namespace consultant_logic.Repositories
             }
         }
 
-        public async Task<Role> UpdateRole(Role role, bool save = true)
+        public async Task<bool> UpdateRole(Role role, bool save = true)
         {
             try
             {
                 Roles dbRole = await _context.Roles.FirstOrDefaultAsync(r => r.Roleid == role.Id);
                 dbRole.Roletext = role.Text;
 
+                _context.Roles.Update(dbRole);
+
                 if (save)
                     await _context.SaveChangesAsync();
 
-                return RoleMapper.Map(dbRole);
+                return true;
             }
             catch (Exception e)
             {
-                return null;
+                return false;
             }
         }
     }

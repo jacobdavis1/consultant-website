@@ -8,7 +8,7 @@ namespace consultant_data.RepositoryInterfaces
 {
     public interface ICaseRepository
     {
-        Task<Case> AddCaseAsync(Case targetCase, bool save = true);
+        Task<bool> AddCaseAsync(Case targetCase, bool save = true);
 
         Task<Case> GetCaseByIdAsync(int caseId);
 
@@ -16,7 +16,7 @@ namespace consultant_data.RepositoryInterfaces
 
         Task<List<Case>> GetAllCasesForClientAsync(User client);
 
-        Task<Case> UpdateCaseAsync(Case targetCase, bool save = true);
+        Task<bool> UpdateCaseAsync(Case targetCase, bool save = true);
 
         Task<bool> DeleteCaseAsync(Case targetCase, bool save = true);
     }
