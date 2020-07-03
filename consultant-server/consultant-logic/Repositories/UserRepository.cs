@@ -27,6 +27,7 @@ namespace consultant_logic.Repositories
             try
             {
                 Users dbUser = _context.Users.Add(UserMapper.Map(user)).Entity;
+                _context.Entry(dbUser).Reference(u => u.UserroleNavigation).Load();
 
                 if (save)
                     await _context.SaveChangesAsync();

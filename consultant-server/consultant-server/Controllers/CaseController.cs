@@ -203,7 +203,7 @@ namespace consultant_server.Controllers
                 if (user == null)
                     return Forbid();
 
-                if (user.Role.Id == Role.Consultant.Id)
+                if (aCase.Clients.Contains(user) || user.Role.Id == Role.Consultant.Id)
                 {
                     await _case.AddCaseAsync(aCase);
                     return NoContent();

@@ -19,7 +19,7 @@ namespace ConsoleRunner
             IUserRepository userRepository = new UserRepository(context);
             IAppointmentRepository appointmentRepository = new AppointmentRepository(context);
             INoteRepository noteRepository = new NoteRepository(context);
-            ICaseRepository caseRepository = new CaseRepository(context, appointmentRepository, noteRepository);
+            ICaseRepository caseRepository = new CaseRepository(context, appointmentRepository, noteRepository, userRepository);
             ICaseStatusRepository caseStatusRepository = new CaseStatusRepository(context);
             IRoleRepository roleRepository = new RoleRepository(context);
 

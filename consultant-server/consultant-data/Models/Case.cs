@@ -13,5 +13,20 @@ namespace consultant_data.Models
         public List<User> Clients { get; set; } = new List<User>();
         public List<Appointment> Appointments { get; set; } = new List<Appointment>();
         public List<Note> Notes { get; set; } = new List<Note>();
+
+        public override bool Equals(Object obj)
+        {
+            Case other = obj as Case;
+
+            if (other == null) return false;
+
+            return (Id == other.Id && ActiveConsultant.Equals(other.ActiveConsultant)
+                        && Status.Equals(other.Status) && Title == other.Title);
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
     }
 }

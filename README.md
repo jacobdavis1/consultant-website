@@ -6,7 +6,7 @@
  Db rework in progress to take advantage of Auth0 identity values and remove all PII from consultant-website db.
  Design will be identity-service-agnostic, in case a different auth service is used in the future.
 
-## Planned controllers and endpoints
+## Controllers and endpoints
   ### User
       i. GET    - /user - Get's the user's information, currently just the role, based on the auth token
   
@@ -35,14 +35,15 @@
  
 
 ## Roadmap
- ### Implement Basic User Stories
- Two user stories to implement:
+ ### Current User Stories
+ Stories supported by the API currently:
    1. I, as a consultant, want to log in and review my cases.
    2. I, as a client, want to log in and review my current cases or start a new case.
+   3. I, as a client, want to schedule an appointment
+   4. I, as a consultant, want to review my appointments
+   5. I, as a consultant, want to reschedule my appointments
+   6. I, as a client, want to reschedule or cancel my appointment
 
  ### Future User Stories
-   1. I, as a client, want to log in and upload files relevant to my case
-   2. I, as a client, want to schedule an appointment
-   3. I, as a consultant, want to review my appointments
-   4. I, as a consultant, want to reschedule my appointments
-   5. I, as a client, want to reschedule or cancel my appointment
+   1. I, as a client, want to log in and upload files relevant to my case (this will be done on the front end via Azure Containers)
+   

@@ -17,12 +17,14 @@ namespace consultant_logic.Repositories
         private readonly khbatlzvContext _context;
         private IAppointmentRepository _appointment;
         private INoteRepository _note;
+        private IUserRepository _user;
 
-        public CaseRepository(khbatlzvContext context, IAppointmentRepository appointment, INoteRepository note)
+        public CaseRepository(khbatlzvContext context, IAppointmentRepository appointment, INoteRepository note, IUserRepository user)
         {
             _context = context;
             _appointment = appointment;
             _note = note;
+            _user = user;
         }
 
         // NOTE: AddCaseAsync isnt able to delay saving due to needing to query the db in order to get the id,
@@ -34,20 +36,23 @@ namespace consultant_logic.Repositories
                 // Add the case
                 Cases dbCase = _context.Cases.Add(CaseMapper.Map(targetCase)).Entity;
                 await _context.SaveChangesAsync();
-                dbCase.Currentstatus = await _context.Casestatuses.FirstOrDefaultAsync(s => s.Statusid == dbCase.Currentstatusid);
+                _context.Entry(dbCase).Reference(c => c.Currentstatus).Load();
+                _context.Entry(dbCase).Reference(c => c.Activeconsultant).Load();
 
                 // Next, add the caseclient entry for every client
                 foreach (User user in targetCase.Clients)
                 {
-                    _context.Caseclient.Add(new Caseclient
+                    Caseclient dbCaseclient = _context.Caseclient.Add(new Caseclient
                     {
                         Caseid = dbCase.Caseid,
                         Clientid = user.Id
-                    });
+                    }).Entity;
 
-                    Users contextUser = await _context.Users.FirstOrDefaultAsync(u => u.Rowid == user.Id);
-                    contextUser.Cases.Add(dbCase);
-                    _context.Users.Update(contextUser);
+                    User u = await _user.GetUserByRowIdAsync(user.Id);
+                    u.Cases.Add(targetCase);
+                    await _user.UpdateUserAsync(u, false);
+
+                    dbCase.Caseclient.Add(dbCaseclient);
                 }
 
                 // Next, add all of the case's appointments, if any
@@ -81,6 +86,8 @@ namespace consultant_logic.Repositories
                     .Include(c => c.Appointments)
                     .Include(c => c.Casenotes)
                     .Include(c => c.Currentstatus)
+                    .Include(c => c.Activeconsultant)
+                        .ThenInclude(u => u.UserroleNavigation)
                     .FirstOrDefaultAsync(c => c.Caseid == caseId);
 
                 if (dbCase == null)
@@ -91,7 +98,9 @@ namespace consultant_logic.Repositories
                 List<Caseclient> caseClients = _context.Caseclient.Where(cc => cc.Caseid == caseId).ToList();
                 foreach (Caseclient cc in caseClients)
                 {
-                    aCase.Clients.Add(UserMapper.Map(await _context.Users.FirstOrDefaultAsync(u => u.Rowid == cc.Clientid)));
+                    Users dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Rowid == cc.Clientid);
+                    _context.Entry(dbUser).Reference(u => u.UserroleNavigation).Load();
+                    aCase.Clients.Add(UserMapper.Map(dbUser));
                 }
 
                 return aCase;
@@ -108,6 +117,7 @@ namespace consultant_logic.Repositories
             {
                 return _context.Cases
                     .Include(c => c.Activeconsultant)
+                        .ThenInclude(u => u.UserroleNavigation)
                     .Include(c => c.Appointments)
                     .Include(c => c.Casenotes)
                     .Include(c => c.Currentstatus)
@@ -158,6 +168,7 @@ namespace consultant_logic.Repositories
                 dbCase.Casetitle = targetCase.Title;
 
                 dbCase = _context.Cases.Update(dbCase).Entity;
+                _context.Entry(dbCase).Reference(c => c.Currentstatus).Load();
 
                 if (save)
                     await _context.SaveChangesAsync();

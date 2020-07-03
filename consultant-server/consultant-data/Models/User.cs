@@ -11,5 +11,20 @@ namespace consultant_data.Models
         public Role Role { get; set; }
 
         public List<Case> Cases { get; set; } = new List<Case>();
+
+        public override bool Equals(object obj)
+        {
+            User other = obj as User;
+
+            if (other == null) return false;
+
+            return (Id == other.Id && UserId == other.UserId
+                        && Role.Equals(other.Role));
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
     }
 }

@@ -1,0 +1,49 @@
+Test case JSON (no clients):
+{
+  "activeConsultant": {
+    "id": 15
+  },
+  "status": {
+    "id": 2,
+    "text": "Assigned"
+  },
+  "title": "Test Case",
+  "clients": [],
+  "appointments": [],
+  "notes": []
+}
+
+Test case JSON (one client):
+{
+  "activeConsultant": {
+    "id": 15
+  },
+  "status": {
+    "id": 2,
+    "text": "Assigned"
+  },
+  "title": "Test Case",
+  "clients": [
+  {
+    "id": 16,
+    "userId": "auth0|5efe12b6aedb3700137989c7",
+    "role": { "id": 2, "text": "Client" },
+    "cases": []
+  }
+],
+  "appointments": [],
+  "notes": []
+}
+
+Test appointment add:
+{
+    "caseId": 16,
+    "appointmentDateTime": "2012-04-23T18:25:43.511Z",
+    "title": "My Appointment"
+}
+
+Test note add:
+{
+    "caseId": 16,
+    "content": "This is some test content."
+}

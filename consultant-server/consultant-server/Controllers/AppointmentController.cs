@@ -152,7 +152,7 @@ namespace consultant_server.Controllers
         }
 
         //v. DELETE - /appointment/{caseId}/{appointmentId}/cancel - Cancels an appointment, deleting it from the server (auth)
-        [HttpDelete("{caseId}/{appointmentId}/cancel")]
+        [HttpDelete("{caseId}/{appointmentId}")]
         public async Task<ActionResult> DeleteAppointmentFromCase(int caseId, int appointmentId)
         {
             try
