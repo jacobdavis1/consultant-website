@@ -62,6 +62,6 @@ export class ConsultantApiService {
       formData.append(`file${i}`, files[i]);
     }
 
-    return this.client.post(`${this.fileShareEndpointOrigin}/api/FileShare`, formData);
+    return this.client.post(`${this.fileShareEndpointOrigin}/api/file/jacobe`, formData);
   }
 }

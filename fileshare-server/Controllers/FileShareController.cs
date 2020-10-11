@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Storage.Files.Shares;
+using Azure.Storage.Files.Shares.Models;
+using fileshare_server.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,27 +14,55 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace fileshare_server.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/file")]
     [ApiController]
     public class FileShareController : ControllerBase
     {
-        // GET: api/<FileShareController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        [HttpGet("{userId}")]
+        public IActionResult GetFileNames(string userId)
         {
-            return new string[] { "value1", "value2" };
+            // Get a reference to a share and then create it
+            ShareClient share = new ShareClient(Secret.AzureConnectionString, Secret.AzureFileShareName);
+            if (!share.Exists())
+                share.Create();
+
+            // Get a reference to a directory and create it
+            ShareDirectoryClient directory = share.GetDirectoryClient(Auth0Utils.GetUserFolder());
+            if (!directory.Exists())
+                directory.Create();
+
+            var files = directory.GetFilesAndDirectories();
+
+            return Ok(files.ToList());
         }
 
-        // GET api/<FileShareController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("{userId}/{fileName}")]
+        public IActionResult DownloadFile(string userId, string fileName)
         {
-            return "value";
+            // Get a reference to a share and then create it
+            ShareClient share = new ShareClient(Secret.AzureConnectionString, Secret.AzureFileShareName);
+            if (!share.Exists())
+                share.Create();
+
+            // Get a reference to a directory and create it
+            ShareDirectoryClient directory = share.GetDirectoryClient(Auth0Utils.GetUserFolder());
+            if (!directory.Exists())
+                directory.Create();
+
+            // Get a reference to a file and upload it
+            ShareFileClient fileClient = directory.GetFileClient(fileName);
+
+            if (fileClient.Exists())
+            {
+                //ShareFileDownloadInfo download = file.Download();
+                return File(fileClient.OpenRead(), "application/octet-stream");
+            } 
+            else return NotFound();
         }
 
-        // POST api/<FileShareController>
-        [HttpPost, DisableRequestSizeLimit]
-        public async Task<IActionResult> Post()
+        // POST api/file
+        [HttpPost("{userId}"), DisableRequestSizeLimit]
+        public IActionResult Post(string userId)
         {
             try
             {
@@ -48,7 +78,7 @@ namespace fileshare_server.Controllers
                     share.Create();
 
                 // Get a reference to a directory and create it
-                ShareDirectoryClient directory = share.GetDirectoryClient("testdir");
+                ShareDirectoryClient directory = share.GetDirectoryClient(Auth0Utils.GetUserFolder());
                 if (!directory.Exists())
                     directory.Create();
 
@@ -76,16 +106,26 @@ namespace fileshare_server.Controllers
             }
         }
 
-        // PUT api/<FileShareController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
         // DELETE api/<FileShareController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("{userId}/{fileName}")]
+        public IActionResult DeleteFile(string userId, string fileName)
         {
+            // Get a reference to a share and then create it
+            ShareClient share = new ShareClient(Secret.AzureConnectionString, Secret.AzureFileShareName);
+            if (!share.Exists())
+                share.Create();
+
+            // Get a reference to a directory and create it
+            ShareDirectoryClient directory = share.GetDirectoryClient(Auth0Utils.GetUserFolder());
+            if (!directory.Exists())
+                directory.Create();
+
+            // Get a reference to a file and upload it
+            ShareFileClient fileClient = directory.GetFileClient(fileName);
+
+            fileClient.DeleteIfExists();
+
+            return Ok();
         }
     }
 }

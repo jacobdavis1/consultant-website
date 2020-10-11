@@ -1,0 +1,26 @@
+This api is responsible for uploading files to an Azure FileShare. Once finished, it will implement three main features:
+1. Uploading files to and retrieving files from an Azure FileShare
+2. Protecting file access with authentication via JWTs
+3. File structure based on user information and designed for ease of navigation on the FileShare side
+
+Notes about each feature goal below.
+
+
+ENDPONTS
+
+/api/file/{userId} - GET : Get names of all files uploaded by a user 
+    RETURNS: JSON list of strings
+/api/file/{userId}/{fileName} - GET : Download a particular file. Returns 404 if there is no such file. Returns 403 if the user doesn't have permission.
+    RETURNS: file to be downloaded
+/api/file/{userId} - POST : Adds a new file to the FileShare or replaces one, assuming that Share belongs to the user identified by the request. Returns 403 if user doesn't have permission.
+    RETURNS: 201 - Created
+/api/file/{userId}/{fileName} - DELETE : Deletes the specified file. Returns 404 if no such file exists. Returns 403 if the user doesn't have permission.
+    RETURNS: 200 - OK
+
+Goal 1 Notes 
+
+Goal 2 Notes 
+- Considering Auth0 for this job still. Okta a possibility.
+
+Goal 3 Notes 
+- Users should have first and last name, as well as a UUID attached to their JWT. This will enable the files to be organized by name, which is preferable for people navigating the files manually.
