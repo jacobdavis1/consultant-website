@@ -89,6 +89,8 @@ namespace fileshare_server.Controllers
                 {
                     fileClient = directory.GetFileClient(file.FileName);
 
+                    fileClient.DeleteIfExists();
+
                     using (Stream stream = file.OpenReadStream())
                     {
                         fileClient.Create(stream.Length);
