@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 export class ConsultantApiService {
 
   private endpointOrigin = `https://localhost:5001`;
+  private fileShareEndpointOrigin = `https://localhost:44379`;
 
   constructor(private client: HttpClient) {
 
@@ -53,4 +54,14 @@ export class ConsultantApiService {
     iii. POST   - /note/{caseId}/new - Create a new note for this case with the enclosed data
      iv. PUT    - /note/{caseId}/{noteId} - Update a note with the given noteId with the enclosed data
       v. DELETE - /note/{caseId}/{noteId} - Delete the note with this ID. */
+
+  uploadFileList$(files : FileList): Observable<any> {
+
+    let formData : FormData = new FormData();
+    for (let i = 0; i < files.length; ++i) {
+      formData.append(`file${i}`, files[i]);
+    }
+
+    return this.client.post(`${this.fileShareEndpointOrigin}/api/FileShare`, formData);
+  }
 }
